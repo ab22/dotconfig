@@ -28,18 +28,16 @@ return {
             ensure_installed = {
                 "lua_ls",
                 "rust_analyzer",
-                "golangci_lint_ls",
                 "tsserver",
             },
             handlers = {
                 function(server_name) -- default handler (optional)
+
                     require("lspconfig")[server_name].setup {
                         capabilities = capabilities
                     }
                 end,
-                ["gopls"] = function() 
-                    require("lspconfig").gopls.setup{}
-                end,
+
                 ["lua_ls"] = function()
                     local lspconfig = require("lspconfig")
                     lspconfig.lua_ls.setup {
@@ -57,6 +55,10 @@ return {
         })
 
         local cmp_select = { behavior = cmp.SelectBehavior.Select }
+        local has_words_before = function()
+            local line, col = unpack(vim.api.nvim_win_get_cursor(0))
+            return col ~= 0 and vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match("%s") == nil
+        end
 
         cmp.setup({
             snippet = {
@@ -65,9 +67,32 @@ return {
                 end,
             },
             mapping = cmp.mapping.preset.insert({
+                ["<CR>"] = cmp.mapping({
+                    i = function(fallback)
+                        if cmp.visible() and cmp.get_active_entry() then
+                            cmp.confirm({ behavior = cmp.ConfirmBehavior.Replace, select = false })
+                        else
+                            fallback()
+                        end
+                    end,
+                    s = cmp.mapping.confirm({ select = true }),
+                    c = cmp.mapping.confirm({ behavior = cmp.ConfirmBehavior.Replace, select = true }),
+                }),
+                ["<Tab>"] = cmp.mapping(function(fallback)
+                    -- This little snippet will confirm with tab, and if no entry is selected, will confirm the first item
+                    if cmp.visible() then
+                        local entry = cmp.get_selected_entry()
+                        if not entry then
+                            cmp.select_next_item({ behavior = cmp.SelectBehavior.Select })
+                        else
+                            cmp.confirm()
+                        end
+                    else
+                        fallback()
+                    end
+                end, {"i","s","c",}),
                 ['<C-p>'] = cmp.mapping.select_prev_item(cmp_select),
                 ['<C-n>'] = cmp.mapping.select_next_item(cmp_select),
-                ['<C-y>'] = cmp.mapping.confirm({ select = true }),
                 ["<C-Space>"] = cmp.mapping.complete(),
             }),
             sources = cmp.config.sources({
