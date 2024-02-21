@@ -87,7 +87,7 @@ return {
                     else
                         fallback()
                     end
-                end, {"i","s","c",}),
+                end, {"i","s"}),
                 ['<C-p>'] = cmp.mapping.select_prev_item(cmp_select),
                 ['<C-n>'] = cmp.mapping.select_next_item(cmp_select),
                 ["<C-Space>"] = cmp.mapping.complete(),
