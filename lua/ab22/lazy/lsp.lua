@@ -71,8 +71,13 @@ return {
             mapping = cmp.mapping.preset.insert({
                 ["<CR>"] = cmp.mapping({
                     i = function(fallback)
-                        if cmp.visible() and cmp.get_active_entry() then
-                            cmp.confirm({ behavior = cmp.ConfirmBehavior.Replace, select = false })
+                        if cmp.visible() then
+                            local entry = cmp.get_selected_entry()
+                            if not entry then
+                                cmp.select_next_item({ behavior = cmp.SelectBehavior.Select })
+                            else
+                                cmp.confirm()
+                            end
                         else
                             fallback()
                         end
