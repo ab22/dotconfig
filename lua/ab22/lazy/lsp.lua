@@ -63,30 +63,17 @@ return {
         end
 
         cmp.setup({
+            completion = {
+                completeopt = 'menu,menuone,noinsert'
+            },
             snippet = {
                 expand = function(args)
                     require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
                 end,
             },
             mapping = cmp.mapping.preset.insert({
-                ["<CR>"] = cmp.mapping({
-                    i = function(fallback)
-                        if cmp.visible() then
-                            local entry = cmp.get_selected_entry()
-                            if not entry then
-                                cmp.select_next_item({ behavior = cmp.SelectBehavior.Select })
-                            else
-                                cmp.confirm()
-                            end
-                        else
-                            fallback()
-                        end
-                    end,
-                    s = cmp.mapping.confirm({ select = true }),
-                    c = cmp.mapping.confirm({ behavior = cmp.ConfirmBehavior.Replace, select = true }),
-                }),
+                ['<CR>'] = cmp.mapping.confirm({ select = true }),
                 ["<Tab>"] = cmp.mapping(function(fallback)
-                    -- This little snippet will confirm with tab, and if no entry is selected, will confirm the first item
                     if cmp.visible() then
                         cmp.select_next_item({ behavior = cmp.SelectBehavior.Select })
                     else
