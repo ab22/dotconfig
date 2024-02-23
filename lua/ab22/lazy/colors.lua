@@ -1,5 +1,5 @@
 function ColorMyPencils(color)
-	color = color or "rose-pine"
+	color = color or "material-deep-ocean"
 	vim.cmd.colorscheme(color)
 
 	vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
@@ -76,7 +76,7 @@ return {
         name = "rose-pine",
         config = function()
             require('rose-pine').setup({
-                disable_background = true,
+                disable_background = false,
             })
 
             vim.cmd("colorscheme rose-pine")
@@ -84,7 +84,18 @@ return {
             ColorMyPencils()
         end
     },
-
+    {
+        "marko-cerovac/material.nvim",
+        config = function ()
+            require("material").setup({
+                plugins = {
+                    "harpoon",
+                    "nvim-cmp",
+                    "telescope",
+                }
+            })
+        end
+    }
 
 }
 
