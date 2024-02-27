@@ -5,7 +5,17 @@ return {
         require('lualine').setup {
             options = {
                 theme = 'catppuccin',
-            }
+                disabled_filetypes = {
+                    statusline = {
+                        'NvimTree',
+                        'DiffviewFiles',
+                    },
+                    winbar = {
+                        'NvimTree',
+                        'DiffviewFiles',
+                    },
+                },
+            },
         }
     end
 }
