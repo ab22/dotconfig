@@ -12,6 +12,8 @@ return {
                 "rust",
                 "go",
                 "json",
+                "proto",
+                "terraform",
                 "bash",
             },
             auto_install = true,
