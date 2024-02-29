@@ -39,6 +39,19 @@ return {
                     }
                 end,
 
+                ["rust_analyzer"] = function()
+                    require("lspconfig").rust_analyzer.setup {
+                        settings = {
+                            ['rust-analyzer'] = {
+                                checkOnSave = true,
+                                check = {
+                                    allTargets = true,
+                                    command = "clippy",
+                                }
+                            }
+                        }
+                    }
+                end,
                 ["lua_ls"] = function()
                     local lspconfig = require("lspconfig")
                     lspconfig.lua_ls.setup {
