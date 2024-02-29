@@ -7,6 +7,16 @@ return {
     },
     config = function()
         require("nvim-tree").setup {
+            diagnostics = {
+                enable = true,
+            },
+            git = {
+                enable = true,
+            },
+            renderer = {
+                highlight_git = "all",
+                highlight_diagnostics = "all",
+            },
             update_focused_file = {
                 enable = true,
             }
