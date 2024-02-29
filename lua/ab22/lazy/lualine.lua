@@ -22,7 +22,7 @@ return {
                     { 'filename', path = 1 }
                 },
                 lualine_c = { 'branch', 'diff', 'diagnostics' },
-                lualine_x = { 'location', { 'encoding', 'fileformat', 'filetype' } },
+                lualine_x = { 'location', 'encoding', 'fileformat', 'filetype' },
                 lualine_y = {},
                 lualine_z = {},
             },
