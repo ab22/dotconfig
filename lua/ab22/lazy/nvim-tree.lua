@@ -7,6 +7,12 @@ return {
     },
     config = function()
         require("nvim-tree").setup {
+            view = {
+                width = {
+                    min = 30,
+                    max = -1, -- Adaptive width.
+                }
+            },
             diagnostics = {
                 enable = true,
             },
@@ -19,7 +25,7 @@ return {
             },
             update_focused_file = {
                 enable = true,
-            }
+            },
         }
     end
 }

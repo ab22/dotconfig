@@ -1,16 +1,13 @@
-local format_golang_grp = vim.api.nvim_create_augroup("GoFormat", {})
-
+-- Golang format on save.
 vim.api.nvim_create_autocmd("BufWritePre", {
     pattern = "*.go",
     callback = function()
         require('go.format').goimport()
     end,
-    group = format_golang_grp,
+    group = vim.api.nvim_create_augroup("GoFormat", {}),
 })
 
-
-local format_lua_grp = vim.api.nvim_create_augroup("LuaFormat", {})
-
+-- Lua format on save.
 vim.api.nvim_create_autocmd("BufWritePre", {
     pattern = "*.lua",
     callback = function()
@@ -19,6 +16,7 @@ vim.api.nvim_create_autocmd("BufWritePre", {
     group = format_golang_grp,
 })
 
+-- Open nvim-tree automatically if we load a directory instead of a file.
 vim.api.nvim_create_autocmd({ "VimEnter" }, {
     callback = function(data)
         local directory = vim.fn.isdirectory(data.file) == 1
