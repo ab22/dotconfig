@@ -54,6 +54,11 @@ return {
 
                 -- custom mappings
                 vim.keymap.set('n', 'A', toggle_adaptive_width, opts('Toggle Adaptive Width'))
+
+                -- open file upon creation
+                api.events.subscribe(api.events.Event.FileCreated, function(file)
+                    vim.cmd("edit " .. file.fname)
+                end)
             end,
         }
     end
