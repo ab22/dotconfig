@@ -30,6 +30,7 @@ return {
                 "rust_analyzer",
                 "tsserver",
                 "gopls",
+                "golangci_lint_ls",
             },
             handlers = {
                 function(server_name) -- default handler (optional)

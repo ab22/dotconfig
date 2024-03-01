@@ -13,7 +13,7 @@ vim.api.nvim_create_autocmd("BufWritePre", {
     callback = function()
         vim.lsp.buf.format()
     end,
-    group = format_golang_grp,
+    group = vim.api.nvim_create_augroup("LuaFormat", {}),
 })
 
 -- Open nvim-tree automatically if we load a directory instead of a file.
