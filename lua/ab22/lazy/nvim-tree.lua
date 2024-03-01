@@ -18,6 +18,10 @@ return {
         end
 
         require("nvim-tree").setup {
+            live_filter = {
+                prefix = "[FILTER]: ",
+                always_show_folders = false,
+            },
             view = {
                 width = {
                     min = 30,
