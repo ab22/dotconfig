@@ -1,0 +1,19 @@
+import = [
+    "~/.config/alacritty/themes/catppuccin-mocha.toml",
+]
+
+live_config_reload = true
+
+[font]
+normal = { family = "Liga SFMono Nerd Font", style = "Regular" }
+size = 13
+
+[cursor]
+style = { shape = "Beam", blinking = "Off" }
+
+[window]
+startup_mode = "Maximized"
+decorations_theme_variant = "Dark"
+
+[selection]
+save_to_clipboard = true
