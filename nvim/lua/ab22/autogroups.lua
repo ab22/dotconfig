@@ -7,13 +7,13 @@ vim.api.nvim_create_autocmd("BufWritePre", {
     group = vim.api.nvim_create_augroup("GoFormat", {}),
 })
 
--- Lua format on save.
+-- Format on save.
 vim.api.nvim_create_autocmd("BufWritePre", {
-    pattern = "*.lua",
+    pattern = "*.rs,*.tf,*.lua",
     callback = function()
         vim.lsp.buf.format()
     end,
-    group = vim.api.nvim_create_augroup("LuaFormat", {}),
+    group = vim.api.nvim_create_augroup("FormatOnSave", {}),
 })
 
 -- Open nvim-tree automatically if we load a directory instead of a file.
