@@ -15,6 +15,8 @@ return {
                 "proto",
                 "terraform",
                 "bash",
+                "regex",
+                "markdown_inline"
             },
             auto_install = true,
             highlight = {
