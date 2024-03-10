@@ -5,7 +5,7 @@ import = [
 live_config_reload = true
 
 [font]
-normal = { family = "Liga SF Mono Nerd Font", style = "Regular" }
+normal = { family = "Roboto Mono Nerd Font Mono", style = "Regular" }
 size = 10
 
 [cursor]

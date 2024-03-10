@@ -7,7 +7,7 @@ source ~/code/powerlevel10k/powerlevel10k.zsh-theme
 export PATH=$PATH:/usr/local/go/bin
 export GOPATH=~/go
 export GOBIN=$GOPATH/bin
-export PATH=$PATH:$GOPATH
+export PATH=$PATH:$GOBIN
 # Rust
 export PATH=$PATH:~/.cargo/bin
 

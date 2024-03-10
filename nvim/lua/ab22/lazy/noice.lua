@@ -11,6 +11,9 @@ return {
             background_colour = "#000000",
         })
         require("noice").setup({
+            messages = {
+                enabled = false,
+            },
             lsp = {
                 override = {
                     ["vim.lsp.util.convert_input_to_markdown_lines"] = true,

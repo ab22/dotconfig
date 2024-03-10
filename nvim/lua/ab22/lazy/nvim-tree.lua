@@ -17,6 +17,9 @@ return {
             return adaptive_width and -1 or 30
         end
 
+        vim.keymap.set('n', '<leader>b', vim.cmd.NvimTreeToggle)
+        vim.keymap.set('n', '<leader>tt', vim.cmd.NvimTreeFocus)
+
         require("nvim-tree").setup {
             live_filter = {
                 prefix = "[FILTER]: ",
