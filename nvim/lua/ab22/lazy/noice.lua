@@ -7,13 +7,20 @@ return {
         "rcarriga/nvim-notify",
     },
     config = function()
+        vim.keymap.set('n', '<leader>nc', function()
+            require("noice").cmd("dismiss")
+        end)
+        vim.keymap.set('n', '<leader>nh', function()
+            require("noice").cmd("history")
+        end)
+        vim.keymap.set('n', '<leader>nl', function()
+            require("noice").cmd("last")
+        end)
+
         require("notify").setup({
             background_colour = "#000000",
         })
         require("noice").setup({
-            messages = {
-                enabled = false,
-            },
             lsp = {
                 override = {
                     ["vim.lsp.util.convert_input_to_markdown_lines"] = true,
@@ -29,5 +36,7 @@ return {
                 lsp_doc_border = false,       -- add a border to hover docs and signature help
             },
         })
+
+        require("telescope").load_extension("noice")
     end,
 }

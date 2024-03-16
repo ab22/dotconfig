@@ -3,7 +3,9 @@ return {
     version = "*",
     lazy = false,
     dependencies = {
+        "nvim-lua/plenary.nvim",
         "nvim-tree/nvim-web-devicons",
+        "MunifTanjim/nui.nvim",
     },
     config = function()
         local adaptive_width = true
