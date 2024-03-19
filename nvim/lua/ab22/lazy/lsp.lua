@@ -11,6 +11,8 @@ return {
         "L3MON4D3/LuaSnip",
         "saadparwaiz1/cmp_luasnip",
         "j-hui/fidget.nvim",
+        -- "hrsh7th/cmp-nvim-lsp-signature-help"
+        "ray-x/lsp_signature.nvim"
     },
 
     config = function()
@@ -89,6 +91,7 @@ return {
             sources = cmp.config.sources({
                 { name = 'nvim_lsp' },
                 { name = 'luasnip' }, -- For luasnip users.
+                -- { name = "nvim_lsp_signature_help" }
             }, {
                 { name = 'buffer' },
             }),
@@ -111,6 +114,8 @@ return {
                 end,
             },
         })
+
+        require("lsp_signature").setup({})
 
         vim.diagnostic.config({
             -- update_in_insert = true,
