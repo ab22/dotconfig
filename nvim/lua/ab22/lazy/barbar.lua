@@ -12,6 +12,11 @@ return {
         vim.keymap.set('n', '<leader>tn', '<Cmd>BufferNext<CR>')
         vim.keymap.set('n', '<leader>tp', '<Cmd>BufferPrevious<CR>')
         vim.keymap.set('n', '<leader>tc', '<Cmd>BufferClose<CR>')
+        vim.keymap.set('n', '<leader>toc', '<Cmd>BufferCloseAllButCurrent<CR>')
+        vim.keymap.set('n', '<leader>tuc', '<Cmd>BufferCloseAllButPinned<CR>')
+        vim.keymap.set('n', '<leader>tlc', '<Cmd>BufferCloseBuffersLeft<CR>')
+        vim.keymap.set('n', '<leader>trc', '<Cmd>BufferCloseBuffersRight<CR>')
+        vim.keymap.set('n', '<leader>tP', '<Cmd>BufferPin<CR>')
 
         vim.keymap.set('n', '<leader>t1', '<Cmd>BufferGoto 1<CR>')
         vim.keymap.set('n', '<leader>t2', '<Cmd>BufferGoto 2<CR>')
