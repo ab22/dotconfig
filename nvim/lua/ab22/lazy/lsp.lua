@@ -116,7 +116,9 @@ return {
             },
         })
 
-        require("lsp_signature").setup({})
+        require("lsp_signature").setup({
+            doc_lines = 0
+        })
 
         vim.diagnostic.config({
             -- update_in_insert = true,

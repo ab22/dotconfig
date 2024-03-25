@@ -32,3 +32,9 @@ vim.api.nvim_create_autocmd({ "VimEnter" }, {
         require("nvim-tree.api").tree.open()
     end
 })
+
+-- Autoread files
+vim.api.nvim_create_autocmd({ "BufEnter", "CursorHold", "CursorHoldI", "FocusGained" }, {
+    command = "if mode() != 'c' | checktime | endif",
+    pattern = { "*" },
+})
