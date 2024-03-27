@@ -11,10 +11,9 @@ return {
         "L3MON4D3/LuaSnip",
         "saadparwaiz1/cmp_luasnip",
         "j-hui/fidget.nvim",
-        -- "hrsh7th/cmp-nvim-lsp-signature-help"
-        "ray-x/lsp_signature.nvim"
+        "ray-x/lsp_signature.nvim",
+        "kevinhwang91/nvim-ufo"
     },
-
     config = function()
         local cmp = require('cmp')
         local cmp_lsp = require("cmp_nvim_lsp")
@@ -23,6 +22,10 @@ return {
             {},
             vim.lsp.protocol.make_client_capabilities(),
             cmp_lsp.default_capabilities())
+        capabilities.textDocument.foldingRange = {
+            dynamicRegistration = false,
+            lineFoldingOnly = true
+        }
 
         require("fidget").setup({})
         require("mason").setup()
@@ -71,6 +74,7 @@ return {
             }
         })
 
+        require('ufo').setup()
         local cmp_select = { behavior = cmp.SelectBehavior.Select }
 
         cmp.setup({
