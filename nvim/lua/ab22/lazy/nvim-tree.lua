@@ -16,7 +16,7 @@ return {
         end
 
         local function get_max_view_width()
-            return adaptive_width and -1 or 30
+            return adaptive_width and -1 or 60
         end
 
         vim.keymap.set('n', '<leader>b', vim.cmd.NvimTreeToggle)
