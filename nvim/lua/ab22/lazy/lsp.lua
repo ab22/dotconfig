@@ -154,6 +154,9 @@ return {
                 -- Buffer local mappings.
                 -- See `:help vim.lsp.*` for documentation on any of the below functions
                 local opts = { buffer = ev.buf }
+                vim.keymap.set('n', '<leader>gd', vim.lsp.buf.declaration, {})
+                vim.keymap.set('n', '<leader>gi', vim.lsp.buf.definition, {})
+                vim.keymap.set('n', '<leader>gr', vim.lsp.buf.references, {})
                 vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, opts)
                 vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
                 vim.keymap.set('n', '<C-k>', vim.lsp.buf.signature_help, opts)
