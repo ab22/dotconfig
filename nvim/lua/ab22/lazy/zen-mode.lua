@@ -1,6 +1,10 @@
 return {
     "folke/zen-mode.nvim",
     opts = {
+        window = {
+            width = .85,
+            backdrop = 0.95
+        },
         plugins = {
             options = {
                 enabled = true,
