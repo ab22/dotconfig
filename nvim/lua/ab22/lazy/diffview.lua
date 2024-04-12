@@ -12,7 +12,7 @@ return {
             }
         })
 
-        vim.keymap.set('n', '<leader>do', vim.cmd.DiffviewOpen)
+        vim.keymap.set('n', '<leader>dv', vim.cmd.DiffviewOpen)
         vim.keymap.set('n', '<leader>dc', vim.cmd.DiffviewClose)
     end
 }
