@@ -7,7 +7,13 @@ return {
         vim.g.barbar_auto_setup = false
     end,
     config = function()
-        require('barbar').setup({})
+        require('barbar').setup({
+            sidebar_filetypes = {
+                NvimTree = true,
+                undotree = true,
+                DiffviewFiles = true,
+            }
+        })
 
         vim.keymap.set('n', '<leader>tn', '<Cmd>BufferNext<CR>')
         vim.keymap.set('n', '<leader>tp', '<Cmd>BufferPrevious<CR>')

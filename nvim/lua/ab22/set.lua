@@ -31,3 +31,7 @@ vim.opt.updatetime = 50
 vim.opt.colorcolumn = "90"
 vim.opt.cursorline = true
 vim.opt.autoread = true
+vim.opt.list = true
+-- Additional optional characters:
+-- eol = '↲', space = '·'
+vim.opt.listchars:append { trail = '·', nbsp = '⎵', tab = '→ ' }
