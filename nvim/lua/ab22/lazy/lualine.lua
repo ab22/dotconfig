@@ -36,6 +36,12 @@ return {
                 lualine_y = {},
                 lualine_z = {},
             },
+            winbar = {
+                lualine_a = { 'searchcount' },
+            },
+            inactive_winbar = {
+                lualine_a = { 'searchcount' },
+            }
         }
     end
 }
