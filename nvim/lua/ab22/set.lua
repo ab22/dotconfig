@@ -34,4 +34,4 @@ vim.opt.autoread = true
 vim.opt.list = true
 -- Additional optional characters:
 -- eol = '↲', space = '·'
-vim.opt.listchars:append { trail = '·', nbsp = '⎵', tab = '→ ' }
+vim.opt.listchars:append { trail = '·', nbsp = '⎵' }
