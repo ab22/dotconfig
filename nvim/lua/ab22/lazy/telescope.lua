@@ -8,7 +8,22 @@ return {
     },
 
     config = function()
-        require('telescope').setup({})
+        local function filenameFirst(_, path)
+            local tail = vim.fs.basename(path)
+            local parent = vim.fs.dirname(path)
+
+            if parent == "." then
+                return tail
+            end
+
+            return string.format("%s\t\t%s", tail, parent)
+        end
+
+        require('telescope').setup({
+            defaults = {
+                path_display = filenameFirst,
+            }
+        })
 
         local builtin = require('telescope.builtin')
         vim.keymap.set('n', '<leader>pf', builtin.find_files, {})
