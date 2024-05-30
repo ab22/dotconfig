@@ -116,11 +116,13 @@ bindsym $mod+a focus parent
 
 # Define names for default workspaces for which we configure key bindings later on.
 # We use variables to avoid repeating the names in multiple places.
+#
+# Icons can be found at https://fontawesome.com/v5/search
 set $ws1 "1:  Terminal"
 set $ws2 "2:  Firefox"
 set $ws3 "3:  Slack"
-set $ws4 "4:  Other"
-set $ws5 "5"
+set $ws4 "4:  VSCode"
+set $ws5 "5:  Other"
 set $ws6 "6"
 set $ws7 "7"
 set $ws8 "8"
