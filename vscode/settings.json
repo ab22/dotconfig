@@ -1,23 +1,29 @@
 {
-    "catppuccin.italicKeywords": false,
+    "[css]": {
+        "editor.formatOnSave": false
+    },
     "catppuccin.italicComments": false,
+    "catppuccin.italicKeywords": false,
     "editor.fontFamily": "'Liga SFMono Nerd Font', 'Iosevka Nerd Font', 'monospace', monospace",
     "editor.fontLigatures": true,
     "editor.fontSize": 12,
+    "editor.formatOnSave": true,
+    "editor.lineNumbers": "relative",
     "files.insertFinalNewline": true,
     "files.trimTrailingWhitespace": true,
     "go.formatTool": "goimports",
-    "go.useLanguageServer": true,
-    "go.lintTool": "golangci-lint",
     "go.lintOnSave": "file",
+    "go.lintTool": "golangci-lint",
     "go.toolsManagement.autoUpdate": true,
+    "go.useLanguageServer": true,
+    "rust-analyzer.check.command": "clippy",
+    "rust-analyzer.checkOnSave": true,
     "vim.cursorStylePerMode.insert": "line-thin",
     "vim.cursorStylePerMode.normal": "line-thin",
-    "vim.cursorStylePerMode.replace": "block",
+    "vim.cursorStylePerMode.replace": "line-thin",
     "vim.cursorStylePerMode.visual": "line-thin",
     "vim.cursorStylePerMode.visualblock": "line-thin",
     "vim.cursorStylePerMode.visualline": "line-thin",
-    "vim.useSystemClipboard": true,
     "vim.handleKeys": {
         "<C-a>": false,
         "<C-b>": false,
@@ -30,6 +36,7 @@
         "<C-s>": false,
         "<C-z>": false
     },
+    "vim.useSystemClipboard": true,
     "workbench.colorTheme": "Catppuccin Mocha",
-    "workbench.iconTheme": "catppuccin-mocha",
+    "workbench.iconTheme": "catppuccin-mocha"
 }
