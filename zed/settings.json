@@ -1,11 +1,15 @@
 {
-  "vim_mode": true,
-  "relative_line_numbers": true,
-  "ui_font_size": 15,
+  "buffer_font_family": "ZedMono Nerd Font Mono",
   "buffer_font_size": 13,
+  "ensure_final_newline_on_save": true,
+  "relative_line_numbers": true,
+  "remove_trailing_whitespace_on_save": true,
   "theme": {
-    "mode": "dark",
+    "dark": "Catppuccin Mocha - No Italics",
     "light": "Catppuccin Mocha - No Italics",
-    "dark": "Catppuccin Mocha - No Italics"
-  }
+    "mode": "system"
+  },
+  "ui_font_family": "ZedMono Nerd Font Propo",
+  "ui_font_size": 15,
+  "vim_mode": true
 }
