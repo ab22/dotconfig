@@ -1,5 +1,5 @@
 {
-  "buffer_font_family": "ZedMono Nerd Font Mono",
+  "buffer_font_family": "IosevkaTerm Nerd Font Mono",
   "buffer_font_size": 13,
   "ensure_final_newline_on_save": true,
   "relative_line_numbers": true,
@@ -9,7 +9,10 @@
     "light": "Catppuccin Mocha - No Italics",
     "mode": "system"
   },
-  "ui_font_family": "ZedMono Nerd Font Propo",
+  "ui_font_family": "Iosevka Nerd Font Propo",
   "ui_font_size": 15,
-  "vim_mode": true
+  "vim_mode": true,
+  "terminal": {
+    "font_family": "IosevkaTerm Nerd Font"
+  }
 }
