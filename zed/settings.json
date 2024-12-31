@@ -1,0 +1,11 @@
+{
+  "vim_mode": true,
+  "relative_line_numbers": true,
+  "ui_font_size": 15,
+  "buffer_font_size": 13,
+  "theme": {
+    "mode": "dark",
+    "light": "Catppuccin Mocha - No Italics",
+    "dark": "Catppuccin Mocha - No Italics"
+  }
+}
