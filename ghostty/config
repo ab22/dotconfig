@@ -1,4 +1,7 @@
 theme = catppuccin-mocha
+
+# Toggle window-decoration
+keybind = ctrl+k>t>d=toggle_window_decorations
 window-decoration  = false
 
 font-size = 10

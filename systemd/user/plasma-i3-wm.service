@@ -1,0 +1,10 @@
+[Unit]
+Description=Plasma i3 Window Manager
+Before=plasma-workspace.target
+
+[Service]
+ExecStart=/usr/bin/i3
+Restart=on-failure
+
+[Install]
+WantedBy=plasma-workspace.target

@@ -9,7 +9,7 @@
     "light": "Catppuccin Mocha - No Italics",
     "mode": "system"
   },
-  "ui_font_family": "Iosevka Nerd Font Propo",
+  "ui_font_family": "IosevkaTerm Nerd Font Mono",
   "ui_font_size": 15,
   "vim_mode": true,
   "terminal": {
