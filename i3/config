@@ -119,7 +119,7 @@ bindsym $mod+a focus parent
 # We use variables to avoid repeating the names in multiple places.
 #
 # Icons can be found at https://fontawesome.com/v5/search
-set $ws1 "1:  Zed"
+set $ws1 "1:  VSCode"
 set $ws2 "2:  Firefox"
 set $ws3 "3:  Slack"
 set $ws4 "4:  Terminal"
@@ -193,9 +193,9 @@ exec_always xrandr --output Virtual-1 --mode 1920x1080
 exec_always feh --bg-fill ~/wallpapers/1722081025419127.png
 
 # Allocate applications to workspaces.
-for_window [class="dev.zed.Zed"] move to workspace $ws1
-for_window [class="firefox"] move to workspace $ws2
-for_window [class="com.mitchellh.ghostty"] move to workspace $ws4
+# for_window [class="dev.zed.Zed"] move to workspace $ws1
+# for_window [class="firefox"] move to workspace $ws2
+# for_window [class="com.mitchellh.ghostty"] move to workspace $ws4
 
 # Colorscheme for i3: catpuccin mocha
 set $rosewater #f5e0dc
