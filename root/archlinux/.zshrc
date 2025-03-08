@@ -33,7 +33,7 @@ export NVM_DIR="$HOME/.nvm"
 
 
 # Load Angular CLI autocompletion.
-# source <(ng completion script)
+source <(ng completion script)
 
 # man configuration variables.
 export MANPAGER='nvim +Man!'

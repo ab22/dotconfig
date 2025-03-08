@@ -20,7 +20,15 @@
     "rust-analyzer.checkOnSave": true,
     "terminal.integrated.fontFamily": "RobotoMono Nerd Font Mono",
     "terminal.integrated.fontSize": 13,
+    "vim.handleKeys": {
+        "<C-b>": false,
+        "<C-k>": false,
+        "<C-f>": false
+    },
     "vim.useSystemClipboard": true,
+    "window.menuBarVisibility": "toggle",
     "workbench.colorTheme": "Catppuccin Mocha",
-    "workbench.iconTheme": "catppuccin-mocha"
+    "workbench.iconTheme": "catppuccin-mocha",
+    "javascript.updateImportsOnFileMove.enabled": "always",
+    "typescript.updateImportsOnFileMove.enabled": "always"
 }
