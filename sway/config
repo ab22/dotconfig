@@ -69,9 +69,9 @@ bindsym $mod+Return exec ghostty
 bindsym $mod+Shift+q kill
 
 # start rofi (a program launcher)
-bindsym $mod+d exec --no-startup-id ~/.config/rofi/launchers/type-3/launcher.sh
+bindsym $mod+d exec --no-startup-id ~/.config/rofi/launchers/custom-app-menu/launcher.sh
 # switch windows with rofi
-# bindsym $mod+Tab exec rofi -show window
+bindsym $mod+Tab exec --no-startup-id ~/.config/rofi/launchers/custom-windows-menu/launcher.sh
 # A more modern dmenu replacement is rofi:
 # bindcode $mod+40 exec "rofi -modi drun,run -show drun"
 # There also is i3-dmenu-desktop which only displays applications shipping a
