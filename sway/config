@@ -39,6 +39,10 @@ exec swayidle -w \
 # and nm-applet is a desktop environment-independent system tray GUI for it.
 exec nm-applet
 
+# Configure monitor positions
+output 'HDMI-A-2' pos 0 360
+output 'DP-5' pos 1920 0
+
 # Use pactl to adjust volume in PulseAudio.
 set $refresh_i3status killall -SIGUSR1 i3status-rs
 bindsym XF86AudioRaiseVolume exec pactl set-sink-volume @DEFAULT_SINK@ +10% && $refresh_i3status
@@ -129,10 +133,10 @@ bindsym $mod+a focus parent
 # We use variables to avoid repeating the names in multiple places.
 #
 # Icons can be found at https://fontawesome.com/v5/search
-set $ws1 "1: 󰲌 Zed"
-set $ws2 "2:  Firefox"
-set $ws3 "3:  Discord"
-set $ws4 "4: 󰊠 Ghostty"
+set $ws1 "1"
+set $ws2 "2"
+set $ws3 "3"
+set $ws4 "4"
 set $ws5 "5"
 set $ws6 "6"
 set $ws7 "7"
