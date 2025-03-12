@@ -5,9 +5,7 @@
 # this file and re-run i3-config-wizard(1).
 #
 
-# i3 config file (v4)
-#
-# Please see https://i3wm.org/docs/userguide.html for a complete reference!
+include /etc/sway/config.d/*
 
 set $mod Mod4
 
@@ -264,6 +262,9 @@ bar {
                 binding_mode       $base $base $surface1
         }
 }
+
+# Set GTK theme for thunar
+# exec_always ~/.config/sway/import-gsettings.sh
 
 # Setup gaps.
 gaps inner 15

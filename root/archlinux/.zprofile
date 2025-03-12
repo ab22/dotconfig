@@ -1,3 +1,6 @@
+# Set theme for GTK apps (Thunar, etc)
+export GTK_THEME=Adwaita:dark
+
 # Autostart i3 on login
 # if [ -z "$DISPLAY" ] && [ "$XDG_VTNR" = 1 ]; then
 #    exec startx /usr/bin/i3
