@@ -1,3 +1,8 @@
+# Set vi mode
+set -o vi
+bindkey -M vicmd '/' history-incremental-search-backward
+bindkey -M vicmd '?' history-incremental-search-forward
+
 # Custom aliases
 alias vim=nvim
 alias ls='ls --color=auto'
