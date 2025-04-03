@@ -44,6 +44,8 @@ exec nm-applet
 output 'HDMI-A-2' pos 0 360
 output 'DP-5' pos 1920 0
 
+input type:keyboard xkb_numlock enabled
+
 # Use pactl to adjust volume in PulseAudio.
 set $refresh_i3status killall -SIGUSR1 i3status-rs
 bindsym XF86AudioRaiseVolume exec pactl set-sink-volume @DEFAULT_SINK@ +10% && $refresh_i3status
