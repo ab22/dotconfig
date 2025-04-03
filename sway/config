@@ -36,6 +36,10 @@ exec swayidle -w \
 	timeout 120 'if pgrep -x swaylock; then swaymsg "output * power off"; fi' \
 	resume 'swaymsg "output * power on"'
 
+# Prevent locking screen when any of these is met:
+for_window [app_id="firefox"] inhibit_idle fullscreen
+for_window [class="vlc"] inhibit_idle fullscreen
+
 # NetworkManager is the most popular way to manage wireless networks on Linux,
 # and nm-applet is a desktop environment-independent system tray GUI for it.
 exec nm-applet
