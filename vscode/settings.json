@@ -18,8 +18,8 @@
     "go.useLanguageServer": true,
     "rust-analyzer.check.command": "clippy",
     "rust-analyzer.checkOnSave": true,
-    "terminal.integrated.fontFamily": "RobotoMono Nerd Font Mono",
-    "terminal.integrated.fontSize": 13,
+    "terminal.integrated.fontFamily": "JetBrainsMono Nerd Font Mono, Iosevka Nerd Font Mono ,'RobotoMono Nerd Font Mono'",
+    "terminal.integrated.fontSize": 12,
     "vim.handleKeys": {
         "<C-b>": false,
         "<C-k>": false,
@@ -30,5 +30,7 @@
     "workbench.colorTheme": "Catppuccin Mocha",
     "workbench.iconTheme": "catppuccin-mocha",
     "javascript.updateImportsOnFileMove.enabled": "always",
-    "typescript.updateImportsOnFileMove.enabled": "always"
+    "typescript.updateImportsOnFileMove.enabled": "always",
+    "makefile.configureOnOpen": true,
+    "github.copilot.nextEditSuggestions.enabled": true
 }
