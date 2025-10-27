@@ -9,28 +9,35 @@
     "editor.fontSize": 12,
     "editor.formatOnSave": true,
     "editor.lineNumbers": "relative",
+    "evenBetterToml.formatter.alignEntries": true,
+    "evenBetterToml.formatter.reorderKeys": true,
+    "evenBetterToml.formatter.trailingNewline": true,
+    "explorer.confirmDragAndDrop": false,
     "files.insertFinalNewline": true,
     "files.trimTrailingWhitespace": true,
+    "github.copilot.nextEditSuggestions.enabled": true,
     "go.formatTool": "goimports",
     "go.lintOnSave": "file",
     "go.lintTool": "golangci-lint",
     "go.toolsManagement.autoUpdate": true,
     "go.useLanguageServer": true,
+    "javascript.updateImportsOnFileMove.enabled": "always",
+    "makefile.configureOnOpen": true,
     "rust-analyzer.check.command": "clippy",
     "rust-analyzer.checkOnSave": true,
     "terminal.integrated.fontFamily": "JetBrainsMono Nerd Font Mono, Iosevka Nerd Font Mono ,'RobotoMono Nerd Font Mono'",
     "terminal.integrated.fontSize": 12,
+    "typescript.updateImportsOnFileMove.enabled": "always",
     "vim.handleKeys": {
         "<C-b>": false,
-        "<C-k>": false,
-        "<C-f>": false
+        "<C-f>": false,
+        "<C-k>": false
     },
     "vim.useSystemClipboard": true,
     "window.menuBarVisibility": "toggle",
     "workbench.colorTheme": "Catppuccin Mocha",
     "workbench.iconTheme": "catppuccin-mocha",
-    "javascript.updateImportsOnFileMove.enabled": "always",
-    "typescript.updateImportsOnFileMove.enabled": "always",
-    "makefile.configureOnOpen": true,
-    "github.copilot.nextEditSuggestions.enabled": true
+    "[json]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    }
 }
