@@ -4,7 +4,11 @@
     },
     "catppuccin.italicComments": false,
     "catppuccin.italicKeywords": false,
+<<<<<<< HEAD
     "editor.fontFamily": "JetBrainsMono Nerd Font Mono, Iosevka Nerd Font Mono ,'RobotoMono Nerd Font Mono'",
+=======
+    "editor.fontFamily": "'IosevkaTerm Nerd Font Mono','RobotoMono Nerd Font Mono'",
+>>>>>>> 0eabe81 (updating vscode+zed settings)
     "editor.fontLigatures": true,
     "editor.fontSize": 12,
     "editor.formatOnSave": true,
@@ -22,22 +26,38 @@
     "go.toolsManagement.autoUpdate": true,
     "go.useLanguageServer": true,
     "javascript.updateImportsOnFileMove.enabled": "always",
+<<<<<<< HEAD
     "makefile.configureOnOpen": true,
     "rust-analyzer.check.command": "clippy",
     "rust-analyzer.checkOnSave": true,
     "terminal.integrated.fontFamily": "JetBrainsMono Nerd Font Mono, Iosevka Nerd Font Mono ,'RobotoMono Nerd Font Mono'",
     "terminal.integrated.fontSize": 12,
+=======
+    "rust-analyzer.check.command": "clippy",
+    "rust-analyzer.checkOnSave": true,
+    "terminal.integrated.fontFamily": "'IosevkaTerm Nerd Font Mono', RobotoMono Nerd Font Mono",
+    "terminal.integrated.fontSize": 13,
+>>>>>>> 0eabe81 (updating vscode+zed settings)
     "typescript.updateImportsOnFileMove.enabled": "always",
     "vim.handleKeys": {
         "<C-b>": false,
         "<C-f>": false,
+<<<<<<< HEAD
         "<C-k>": false
+=======
+        "<C-k>": false,
+        "<C-p>": false
+>>>>>>> 0eabe81 (updating vscode+zed settings)
     },
     "vim.useSystemClipboard": true,
     "window.menuBarVisibility": "toggle",
     "workbench.colorTheme": "Catppuccin Mocha",
+<<<<<<< HEAD
     "workbench.iconTheme": "catppuccin-mocha",
     "[json]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode"
     }
+=======
+    "workbench.iconTheme": "catppuccin-mocha"
+>>>>>>> 0eabe81 (updating vscode+zed settings)
 }
