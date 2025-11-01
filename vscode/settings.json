@@ -29,6 +29,7 @@
     "terminal.integrated.fontSize": 12,
     "typescript.updateImportsOnFileMove.enabled": "always",
     "vim.handleKeys": {
+        "<C-a>": false,
         "<C-b>": false,
         "<C-f>": false,
         "<C-k>": false,

@@ -1,4 +1,10 @@
 {
+  "git_panel": {
+    "collapse_untracked_diff": false,
+    "status_style": "label_color",
+    "dock": "left",
+    "button": true
+  },
   "features": {
     "edit_prediction_provider": "copilot"
   },
@@ -10,13 +16,13 @@
     }
   },
   "icon_theme": "Catppuccin Mocha",
-  "buffer_font_family": "IosevkaTerm Nerd Font Mono",
-  "buffer_font_size": 13,
+  "buffer_font_family": "JetBrainsMono Nerd Font Mono",
+  "buffer_font_size": 12,
   "ensure_final_newline_on_save": true,
   "relative_line_numbers": true,
   "remove_trailing_whitespace_on_save": true,
   "terminal": {
-    "font_family": "IosevkaTerm Nerd Font Mono"
+    "font_family": "JetBrainsMono Nerd Font Mono"
   },
   "theme": {
     "dark": "Catppuccin Mocha - No Italics",

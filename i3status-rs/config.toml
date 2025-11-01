@@ -67,7 +67,7 @@ command = ":"
 interval = "once"
 [[block.click]]
 button = "left"
-cmd = "~/.config/rofi/powermenu/type-4/powermenu.sh"
+cmd = "~/.config/rofi/powermenu/type-2/powermenu.sh"
 
 [block.theme_overrides]
 idle_bg = "#1e1e2e"

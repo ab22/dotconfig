@@ -4,6 +4,6 @@ theme = catppuccin-mocha
 keybind = ctrl+k>t>d=toggle_window_decorations
 # window-decoration  = false
 
-font-size = 12
+font-size = 10
 #font-family = JetBrains Mono Nerd Fon4
 # font-family = Iosevka Mono Nerd Font Mono

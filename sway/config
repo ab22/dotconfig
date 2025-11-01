@@ -9,7 +9,7 @@ include /etc/sway/config.d/*
 
 set $mod Mod4
 
-bindsym $mod+p exec ~/.config/rofi/powermenu/type-2/launcher.sh
+bindsym $mod+p exec ~/.config/rofi/powermenu/type-2/powermenu.sh
 bindsym $mod+x exec powermenu_t2
 
 # Font for window titles. Will also be used by the bar unless a different font
