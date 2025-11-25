@@ -9,6 +9,7 @@ bindkey -M vicmd '?' history-incremental-search-forward
 # Custom aliases
 alias vim=nvim
 alias ls='ls --color=auto'
+alias gbc='git branch --show-current | tr -d "\n" | pbcopy'
 # Set Powerlevel10k theme.
 source ~/code/powerlevel10k/powerlevel10k.zsh-theme
 # Golang
