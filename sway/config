@@ -49,6 +49,10 @@ output 'HDMI-A-2' pos 0 360
 output 'DP-5' pos 1920 0
 
 input type:keyboard xkb_numlock enabled
+input type:pointer {
+    accel_profile flat
+    pointer_accel 0.2
+}
 
 # Use pactl to adjust volume in PulseAudio.
 set $refresh_i3status killall -SIGUSR1 i3status-rs

@@ -42,3 +42,6 @@ source <(ng completion script)
 # man configuration variables.
 export MANPAGER='nvim +Man!'
 export MANWIDTH=90
+
+# Autocompletion for go-task
+eval "$(task --completion zsh)"

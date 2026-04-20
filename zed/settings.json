@@ -1,4 +1,9 @@
 {
+  "agent_servers": {
+    "claude-acp": {
+      "type": "registry"
+    }
+  },
   "git_panel": {
     "collapse_untracked_diff": false,
     "status_style": "label_color",
