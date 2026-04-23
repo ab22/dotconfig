@@ -1,16 +1,27 @@
 version: "3"
 
 tasks:
-  gen:
-    desc: Generate all OS-specific config artifacts
-    deps: [gen-zed]
+  gen-linux:
+    desc: Generate all linux-specific config artifacts
+    deps: [gen-zed-linux]
 
-  gen-zed:
-    desc: Merge zed base + overrides into OS-specific artifacts
+  gen-zed-linux:
+    desc: Merge zed base + overrides into linux specific artifacts
     cmds:
       - jq -s '.[0] * .[1]' zed/settings.base.json zed/settings.linux_overrides.json > zed/settings.json
       - jq -s '.[0] + .[1]' zed/keymap.base.json zed/keymap.linux_overrides.json > zed/keymap.json
       - jq -s '.[0] + .[1]' zed/tasks.base.json zed/tasks.linux_overrides.json > zed/tasks.json
+
+  gen-mac:
+    desc: Generate all mac specific config artifacts
+    deps: [gen-zed-mac]
+
+  gen-zed-mac:
+    desc: Merge zed base + overrides into mac specific artifacts
+    cmds:
+      - jq -s '.[0] * .[1]' zed/settings.base.json zed/settings.mac_overrides.json > zed/settings.json
+      - jq -s '.[0] + .[1]' zed/keymap.base.json zed/keymap.mac_overrides.json > zed/keymap.json
+      - jq -s '.[0] + .[1]' zed/tasks.base.json zed/tasks.mac_overrides.json > zed/tasks.json
 
   link:
     desc: Create all symlinks for OS-specific configs
