@@ -5,5 +5,10 @@
         "path": "/home/abe/.cargo/bin/rust-analyzer"
       }
     }
+  },
+  "agent": {
+    "tool_permissions": {
+      "default": "confirm"
+    }
   }
 }
