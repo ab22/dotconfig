@@ -1,40 +1,26 @@
 {
-  "project_panel": {
-    "dock": "left",
-  },
-  "outline_panel": {
-    "dock": "left",
-  },
-  "collaboration_panel": {
-    "dock": "left",
-  },
-  "agent": {
-    "dock": "right",
-    "favorite_models": [],
-    "model_parameters": [],
-  },
-  "edit_predictions": {
-    "provider": "none",
-  },
   "agent_servers": {
     "claude-acp": {
-      "type": "registry",
-    },
+      "type": "registry"
+    }
   },
   "git_panel": {
     "collapse_untracked_diff": false,
     "status_style": "label_color",
     "dock": "left",
-    "button": true,
+    "button": true
+  },
+  "features": {
+    "edit_prediction_provider": "copilot"
   },
   "lsp": {
     "rust-analyzer": {
       "binary": {
-        "path": "/home/abe/.cargo/bin/rust-analyzer",
-      },
-    },
+        "path": "/home/abe/.cargo/bin/rust-analyzer"
+      }
+    }
   },
-  "auto_signature_help": false,
+  "auto_signature_help": true,
   "icon_theme": "Catppuccin Mocha",
   "buffer_font_family": "JetBrainsMono Nerd Font Mono",
   "buffer_font_size": 12,
@@ -43,18 +29,15 @@
   "remove_trailing_whitespace_on_save": true,
   "terminal": {
     "font_family": "JetBrainsMono Nerd Font Mono",
-    "font_size": 12,
+    "font_size": 12
   },
   "theme": {
     "dark": "Catppuccin Mocha - No Italics",
     "light": "Catppuccin Mocha - No Italics",
-    "mode": "system",
+    "mode": "system"
   },
   "ui_font_family": "JetBrainsMono Nerd Font",
   "ui_font_size": 14,
   "vim_mode": true,
-  "wrap_guides": [90, 120],
-  "minimap": {
-    "show": "always",
-  },
+  "wrap_guides": [90, 120]
 }

@@ -1,0 +1,25 @@
+version: "3"
+
+tasks:
+  gen:
+    desc: Generate all OS-specific config artifacts
+    deps: [gen-zed]
+
+  gen-zed:
+    desc: Merge zed base + overrides into OS-specific artifacts
+    cmds:
+      - jq -s '.[0] * .[1]' zed/settings.base.json zed/settings.linux_overrides.json > zed/settings.json
+      - jq -s '.[0] + .[1]' zed/keymap.base.json zed/keymap.linux_overrides.json > zed/keymap.json
+      - jq -s '.[0] + .[1]' zed/tasks.base.json zed/tasks.linux_overrides.json > zed/tasks.json
+
+  link:
+    desc: Create all symlinks for OS-specific configs
+    deps: [link-zed]
+
+  link-zed:
+    desc: Symlink zed generated configs into ~/.config/zed
+    cmds:
+      - mkdir -p $HOME/.config/zed
+      - ln -sf {{.TASKFILE_DIR}}/zed/settings.json $HOME/.config/zed/settings.json
+      - ln -sf {{.TASKFILE_DIR}}/zed/keymap.json $HOME/.config/zed/keymap.json
+      - ln -sf {{.TASKFILE_DIR}}/zed/tasks.json $HOME/.config/zed/tasks.json

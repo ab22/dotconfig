@@ -1,0 +1,8 @@
+[
+  {
+    "context": "Editor && vim_mode == visual && !VimWaiting && !VimObject",
+    "bindings": {
+      "p": ["vim::Paste", { "preserve_clipboard": true }]
+    }
+  }
+]

@@ -1,0 +1,9 @@
+{
+  "lsp": {
+    "rust-analyzer": {
+      "binary": {
+        "path": "/home/abe/.cargo/bin/rust-analyzer"
+      }
+    }
+  }
+}
