@@ -46,3 +46,7 @@ fi
 # man configuration variables.
 export MANPAGER='nvim +Man!'
 export MANWIDTH=90
+
+# Load direnv automatically
+eval "$(direnv hook zsh)"
+
