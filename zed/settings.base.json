@@ -50,5 +50,9 @@
   "wrap_guides": [90, 120],
   "minimap": {
     "show": "always"
+  },
+  "file_types": {
+    "Shell Script": [".envrc*", ".env*"],
+    "Dockerfile": ["Dockerfile*"]
   }
 }
