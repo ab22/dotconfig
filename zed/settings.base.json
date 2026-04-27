@@ -52,7 +52,7 @@
     "show": "always"
   },
   "file_types": {
-    "Shell Script": [".envrc*", "*.env*"],
+    "Shell Script": [".envrc*", "*.env*", "*.blobl"],
     "Dockerfile": ["Dockerfile*"]
   }
 }
