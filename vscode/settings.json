@@ -1,6 +1,6 @@
 {
   "[css]": {
-    "editor.formatOnSave": false
+    "editor.formatOnSave": false,
   },
   "catppuccin.italicComments": false,
   "catppuccin.italicKeywords": false,
@@ -33,13 +33,18 @@
     "<C-b>": false,
     "<C-f>": false,
     "<C-k>": false,
-    "<C-p>": false
+    "<C-p>": false,
   },
   "vim.useSystemClipboard": true,
   "window.menuBarVisibility": "toggle",
   "workbench.colorTheme": "Catppuccin Mocha",
   "workbench.iconTheme": "catppuccin-mocha",
   "[json]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  }
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+  },
+  "raspberry-pi-pico.python3Path": "/opt/homebrew/bin/python3",
+  "[jsonc]": {
+    "editor.defaultFormatter": "vscode.json-language-features",
+  },
+  "chat.tips.enabled": false,
 }

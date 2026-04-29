@@ -1,6 +1,11 @@
 {
   "lsp": {
     "rust-analyzer": {
+      "initialization_options": {
+        "check": {
+          "command": "clippy"
+        }
+      },
       "binary": {
         "path": "/home/abe/.cargo/bin/rust-analyzer"
       }
