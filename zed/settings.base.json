@@ -53,6 +53,7 @@
   },
   "file_types": {
     "Shell Script": [".envrc*", "*.env*", "*.blobl"],
-    "Dockerfile": ["Dockerfile*"]
+    "Dockerfile": ["Dockerfile*"],
+    "Linker Script": ["*.x"]
   }
 }
