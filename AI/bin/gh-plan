@@ -1,0 +1,572 @@
+#!/usr/bin/env bash
+#
+# gh-plan — Turn a plan / wireframe doc into GitHub Issue ticket(s).
+#
+# CANONICAL HOME: ab22/dotconfig -> AI/bin/gh-plan (exposed on $PATH). It talks
+# to GitHub via `gh`, so it works from ANY repo / cwd regardless of where the
+# doc lives (repo-agnostic).
+#
+# Project docs that describe this workflow:
+#   serenity_api/.agents/TICKETS.md  and  serenity_ui/.agents/TICKETS.md
+#
+# Conventions:
+#   * A plan doc starts with a "# Title" heading (or a .txt banner); optionally
+#     declares the target repo(s) on a marker line anywhere near the top:
+#         Repos: api | ui | both          (also accepts "> Repos: ...")
+#   * `new <doc>` files ONE issue per target repo on ab22/serenity_api and/or
+#     ab22/serenity_ui, tagged with the `plan` label.
+#   * The ticket body = short "## Summary" on top + the FULL doc embedded in a
+#     collapsible <details> block (GitHub Issues have no file attachments, so
+#     "attaching" = embedding the doc inside the ticket).
+#   * On success the local doc file is DELETED (ticket becomes source of truth)
+#     unless --keep is passed.
+#   * Each ticket doubles as the implementation ticket. Start work on branch:
+#         feat/api-<n>-<slug>    /    feat/ui-<n>-<slug>
+#     `gh-plan branch <api|ui> <issue-id>` prints (or creates) that branch, and
+#     `gh-plan pr <api|ui> <issue-id>` opens the PR with "Closes #<n>" pre-filled.
+#   * PRs target `alpha` (dev); releases promote alpha -> beta -> main.
+
+set -u
+
+API_REPO="ab22/serenity_api"
+UI_REPO="ab22/serenity_ui"
+LABEL="plan"
+LABEL_COLOR="d4c5f9"
+LABEL_DESC="Plan/design doc embedded in the ticket; doubles as implementation ticket"
+LABEL_PROGRESS="in progress"
+LABEL_PROGRESS_COLOR="fbca04"
+LABEL_PROGRESS_DESC="Implementation underway — a PR is open"
+SUMMARY_MAX=900       # max chars for the auto summary
+SLUG_MAX=30           # max chars for the branch slug segment
+
+API_LOCAL="/Users/abe/code/serenity_api"
+UI_LOCAL="/Users/abe/code/serenity_ui"
+DEFAULT_BASE="alpha"   # dev branch; feature PRs target it (releases: alpha -> beta -> main)
+
+usage() {
+  cat <<'EOF'
+gh-plan — file plan docs as GitHub Issues (see .agents/TICKETS.md)
+
+USAGE
+  gh-plan new <plan-doc> [options]
+  gh-plan branch <api|ui> <issue-id> [--create]
+  gh-plan branch <issue-url> [--create]
+  gh-plan pr <api|ui> <issue-id> [--draft] [--base <branch>] [--force]
+
+COMMAND: new
+  Files an issue per target repo. Target = --repo flag, else a "Repos:" marker
+  line in the doc, else BOTH repos.
+
+  Options:
+    --repo api|ui|both   Which repo(s) to file in (overrides the doc marker).
+    --title  "..."       Override the title (default: first "# " heading).
+    --summary "..."      Override the summary (default: first paragraph).
+    --keep               Do NOT delete the local doc file after filing.
+    --dry-run            Show everything that would happen; touch nothing.
+
+COMMAND: branch
+  Prints the implementation branch name for a ticket, e.g.
+  feat/api-12-orders-x. Run from inside that repo to also create it:
+    --create             git checkout -b <feat-branch> from alpha (dev).
+    --base <branch>      Base for --create (default: alpha).
+
+COMMAND: pr
+  Opens the PR that implements the ticket (run from inside the target repo on
+  the feature branch, already pushed). Title = issue title; body starts with
+  "Closes #<issue-id>" so GitHub auto-links (and closes on merge) the issue.
+  Adds the companion ticket line when the issue has one. Also moves the issue
+  from `plan` to `in progress`.
+
+  Options:
+    --draft              Open as a draft PR.
+    --base <branch>      Target branch (default: alpha = dev; releases promote
+                         alpha -> beta -> main). Use beta/main for hotfixes.
+    --force              PR from the current branch even if it is not the
+                         expected feature branch for this issue.
+
+COMMAND: update
+  Refreshes an existing ticket body after its plan doc changed: replaces the
+  summary (first paragraph, or --summary) and the embedded <details> document,
+  PRESERVING the companion-ticket cross-link. Title/labels unchanged.
+
+    gh-plan update <api|ui> <issue-id> <plan-doc> [--summary "..."]
+
+EXAMPLES
+  gh-plan new docs/orders-plan.md                      # files api + ui
+  gh-plan new docs/x.md --repo api --summary "Add ..." # api only
+  gh-plan new docs/x.md --dry-run                      # preview
+  gh-plan branch api 12                                # feat/api-12-…
+  gh-plan branch ui 7 --create
+  gh-plan pr api 12 --draft                            # PR closes api#12
+  gh-plan update api 12 docs/my-plan.md                # refresh ticket body
+EOF
+  exit 0
+}
+
+fail() { echo "gh-plan: ERROR: $*" >&2; exit 1; }
+say()  { printf '%s\n' "$*"; }
+
+# ---------------------------------------------------------------------------
+# helpers
+# ---------------------------------------------------------------------------
+
+repo_full() { # $1 = api|ui  -> prints full "owner/repo"
+  case "$1" in
+    api) printf '%s' "$API_REPO" ;;
+    ui)  printf '%s' "$UI_REPO" ;;
+    *)   fail "unknown repo '$1' (use api or ui)" ;;
+  esac
+}
+
+repo_local() { # $1 = api|ui -> prints local path
+  case "$1" in
+    api) printf '%s' "$API_LOCAL" ;;
+    ui)  printf '%s' "$UI_LOCAL" ;;
+  esac
+}
+
+slugify() { # $1 = title  -> prints kebab slug, trimmed to SLUG_MAX
+  printf '%s' "$1" \
+    | tr '[:upper:]' '[:lower:]' \
+    | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//' \
+    | cut -c1-"$SLUG_MAX" \
+    | sed -E 's/-+$//'
+}
+
+derive_title() { # $1 = doc  -> prints title
+  local doc="$1" t
+  t="$(grep -m1 -E '^#[[:space:]]+' "$doc" | sed -E 's/^#[[:space:]]*//' | sed -E 's/[[:space:]]+$//')"
+  if [ -z "$t" ]; then
+    local fb
+    fb="$(basename "$doc")"; fb="${fb%.*}"
+    t="$(printf '%s' "$fb" | tr '_-' '  ' | sed -E 's/[[:space:]]+/ /g; s/^ //; s/ $//')"
+  fi
+  [ -n "$t" ] || fail "could not derive a title from '$doc' (pass --title)"
+  printf '%s' "$t"
+}
+
+detect_repos() { # $1 = doc  -> prints api|ui|both|"" ("" = not declared)
+  local marker m
+  marker="$(grep -im1 -E 'repos[[:space:]]*:' "$1")" || { printf ''; return; }
+  m="$(printf '%s' "$marker" \
+        | tr '[:upper:]' '[:lower:]' \
+        | sed -E 's/.*repos[[:space:]]*:[[:space:]]*//' \
+        | tr -d '`*>#')"
+  case "$m" in
+    *both*)            printf 'both' ;;
+    *api*,*ui*|*api*ui*|*api*and*ui*) printf 'both' ;;
+    *api*)             printf 'api' ;;
+    *ui*)              printf 'ui' ;;
+    *)                 printf '' ;;
+  esac
+}
+
+derive_summary() { # $1 = doc  -> prints first paragraph, trimmed to SUMMARY_MAX
+  local doc="$1" s
+  s="$(awk '
+    /^[[:space:]]*#/            { next }            # markdown headings
+    /^[[:space:]]*[=]{4,}[[:space:]]*$/ { next }    # ==== banners
+    /^[[:space:]]*-{4,}[[:space:]]*$/ { next }      # ---- rules
+    /^[[:space:]]*[>|*_ -]*[[:space:]]*[Rr]epos[[:space:]]*:/ { next }  # Repos: marker
+    /^[[:space:]]*$/            { if (out) exit }   # blank line ends paragraph
+    {
+      line=$0
+      sub(/^[[:space:]]*[>|*_ -]+/, "", line)
+      gsub(/\*\*/, "", line)
+      if (line == "") next
+      if (!out) { out=1; printf "%s", line } else { printf " %s", line }
+      if (++n >= 6) exit
+    }
+  ' "$doc")"
+  s="$(printf '%s' "$s" | sed -E 's/[[:space:]]+/ /g; s/^ //; s/ $//')"
+  if [ -z "$s" ]; then
+    s="Plan / design document for this ticket. See the plan document below for full context."
+  fi
+  if [ "${#s}" -gt "$SUMMARY_MAX" ]; then
+    s="$(printf '%s' "$s" | cut -c1-$SUMMARY_MAX)"
+    s="${s% *}…"
+  fi
+  printf '%s' "$s"
+}
+
+# build_body <doc> <companion-text>  -> writes temp file, prints its path
+build_body() {
+  local doc="$1" companion="$2" tmp
+  tmp="$(mktemp -t ghplan-body.XXXXXX)"
+  {
+    echo "## Summary"
+    echo
+    printf '%s\n' "$summary"
+    if [ -n "$companion" ]; then
+      echo
+      printf '%s\n' "$companion"
+    fi
+    echo
+    echo "---"
+    echo
+    echo "<details>"
+    echo "<summary>📄 Plan document</summary>"
+    echo
+    cat "$doc"
+    echo
+    echo "</details>"
+  } > "$tmp"
+  printf '%s' "$tmp"
+}
+
+require_gh() {
+  command -v gh >/dev/null 2>&1 || fail "'gh' is not installed — run: brew install gh"
+  if [ "${1:-auth}" = auth ]; then
+    gh auth status >/dev/null 2>&1 \
+      || fail "not logged into GitHub — run once: gh auth login"
+  fi
+}
+
+ensure_label() { # $1 = api|ui  [$2 = label name] [$3 = color] [$4 = desc]
+  local full name color desc
+  full="$(repo_full "$1")"
+  name="${2:-$LABEL}"
+  color="${3:-$LABEL_COLOR}"
+  desc="${4:-$LABEL_DESC}"
+  if ! gh label list -R "$full" --json name -q '.[].name' 2>/dev/null | grep -qx "$name"; then
+    say "  creating label '$name' on $full …"
+    gh label create "$name" -R "$full" --color "$color" --description "$desc" >/dev/null \
+      || fail "could not create label '$name' on $full"
+  fi
+}
+
+check_access() { # $1 = api|ui  -> fail fast if repo unreachable (no -R on repo view)
+  local full
+  full="$(repo_full "$1")"
+  gh repo view "$full" --json nameWithOwner >/dev/null 2>&1 \
+    || fail "cannot access $full — check gh auth & repo permissions"
+}
+
+# ---------------------------------------------------------------------------
+# command: new
+# ---------------------------------------------------------------------------
+
+cmd_new() {
+  local doc="" repo="" title="" summary="" keep=0 dry_run=0
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --repo)    repo="$2";    shift 2 ;;
+      --title)   title="$2";   shift 2 ;;
+      --summary) summary="$2"; shift 2 ;;
+      --keep)    keep=1;       shift ;;
+      --dry-run) dry_run=1;    shift ;;
+      -h|--help) usage ;;
+      --*)       fail "unknown option: $1" ;;
+      *)         doc="$1";     shift ;;
+    esac
+  done
+  [ -n "$doc" ] || fail "missing <plan-doc> path (see --help)"
+  [ -f "$doc" ] || fail "file not found: $doc"
+
+  # --- resolve title / summary / repos -----------------------------------
+  [ -n "$title" ]   || title="$(derive_title "$doc")"
+  [ -n "$summary" ] || summary="$(derive_summary "$doc")"
+
+  if [ -n "$repo" ]; then
+    case "$repo" in
+      api|ui|both) ;;
+      *) fail "--repo must be api, ui or both (got '$repo')" ;;
+    esac
+  else
+    repo="$(detect_repos "$doc")"
+    [ -n "$repo" ] || repo="both"
+    say "no --repo given; doc declares: '$repo'"
+  fi
+
+  case "$repo" in
+    both) repos="api ui" ;;
+    api)  repos="api" ;;
+    ui)   repos="ui" ;;
+  esac
+
+  slug="$(slugify "$title")"
+  say ""
+  say "  Plan document : $doc"
+  say "  Title         : $title"
+  say "  Target repos  : $repos"
+  say "  Branch slug   : $slug"
+  say "  Label         : $LABEL"
+  s_preview="$(printf '%s' "$summary" | cut -c1-120)"
+  [ "${#summary}" -gt 120 ] && s_preview="${s_preview}…"
+  say "  Summary       : $s_preview"
+  say ""
+
+  if [ "$dry_run" = 1 ]; then
+    say "DRY RUN — no changes made. Would run:"
+    for r in $repos; do
+      full="$(repo_full "$r")"
+      say "  gh issue create -R $full --title \"$title\" --label $LABEL --body-file <summary+doc>"
+      say "  gh label create $LABEL -R $full   (only if missing)"
+      say "  branch to use for implementation: feat/$r-<n>-$slug"
+    done
+    say "  then delete local file: $doc   (skipped: --dry-run)"
+    exit 0
+  fi
+
+  require_gh
+  for r in $repos; do check_access "$r"; done
+
+  # --- create -------------------------------------------------------------
+  api_num=""; ui_num=""; api_url=""; ui_url=""
+  for r in $repos; do
+    full="$(repo_full "$r")"
+    ensure_label "$r"
+    body="$(build_body "$doc" "")"
+    say "creating issue in $full …"
+    url="$(gh issue create -R "$full" \
+            --title "$title" \
+            --label "$LABEL" \
+            --body-file "$body" 2>&1)" || {
+      rm -f "$body"; fail "gh issue create failed in $full: $url"
+    }
+    rm -f "$body"
+    num="$(printf '%s' "$url" | sed -E 's#.*/issues/([0-9]+)$#\1#')"
+    case "$r" in
+      api) api_num="$num"; api_url="$url" ;;
+      ui)  ui_num="$num"; ui_url="$url" ;;
+    esac
+    say "  $url"
+  done
+
+  # --- cross-link companion tickets (api <-> ui) --------------------------
+  if [ -n "$api_num" ] && [ -n "$ui_num" ]; then
+    say "linking companion tickets …"
+    body="$(build_body "$doc" "**Companion ticket:** [#$ui_num]($ui_url) in \`$UI_REPO\`")"
+    gh issue edit "$api_num" -R "$API_REPO" --body-file "$body" >/dev/null 2>&1 \
+      || say "  warning: could not link companion on api#$api_num"
+    rm -f "$body"
+    body="$(build_body "$doc" "**Companion ticket:** [#$api_num]($api_url) in \`$API_REPO\`")"
+    gh issue edit "$ui_num" -R "$UI_REPO" --body-file "$body" >/dev/null 2>&1 \
+      || say "  warning: could not link companion on ui#$ui_num"
+    rm -f "$body"
+  fi
+
+  # --- summary + branch names ---------------------------------------------
+  say ""
+  say "Done. Tickets:"
+  [ -n "$api_num" ] && say "  api:  $api_url"
+  [ -n "$ui_num" ]  && say "  ui:   $ui_url"
+  say ""
+  say "Start implementation with:"
+  for r in $repos; do
+    num=""; [ "$r" = api ] && num="$api_num"
+    [ "$r" = ui ]  && num="$ui_num"
+    localp="$(repo_local "$r")"
+    say "  cd $localp && git checkout -b feat/$r-$num-$slug   # $r ticket #$num"
+  done
+
+  # --- delete local doc (ticket is now the source of truth) ---------------
+  if [ "$keep" = 1 ]; then
+    say "keeping local file (--keep): $doc"
+  else
+    rm -f "$doc" && say "deleted local file (ticket is source of truth): $doc"
+  fi
+}
+
+# ---------------------------------------------------------------------------
+# command: branch
+# ---------------------------------------------------------------------------
+
+cmd_branch() {
+  local repo_short="" issue="" create=0 url="" title num branch base=""
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --create) create=1; shift ;;
+      --base)   base="$2"; shift 2 ;;
+      -h|--help) usage ;;
+      --*) fail "unknown option: $1" ;;
+      *)  # positional: either "api 12" / "ui 12", or a full issue URL
+        if [ -z "$repo_short" ] && { [ "$1" = api ] || [ "$1" = ui ]; }; then
+          repo_short="$1"
+        else
+          issue="$1"
+        fi
+        shift ;;
+    esac
+  done
+  [ -n "$issue" ] || fail "missing issue id or url (see --help)"
+
+  # if a full URL was given, derive repo_short + issue id
+  if printf '%s' "$issue" | grep -q 'github.com'; then
+    url="$issue"
+    case "$url" in
+      *"$API_REPO"*) repo_short="api" ;;
+      *"$UI_REPO"*)  repo_short="ui" ;;
+      *) fail "URL does not look like $API_REPO or $UI_REPO: $url" ;;
+    esac
+    issue="$(printf '%s' "$url" | sed -E 's#.*/issues/([0-9]+)/?$#\1#')"
+  fi
+  [ -n "$repo_short" ] || fail "could not determine repo (use 'api' or 'ui')"
+
+  require_gh
+  full="$(repo_full "$repo_short")"
+  title="$(gh issue view "$issue" -R "$full" --json title -q .title 2>/dev/null)" \
+    || fail "issue #$issue not found on $full"
+  slug="$(slugify "$title")"
+  branch="feat/$repo_short-$issue-$slug"
+  say "branch: $branch"
+  if [ "$create" = 1 ]; then
+    if [ "$(pwd)" != "$(repo_local "$repo_short")" ]; then
+      say "warning: you are not in $(repo_local "$repo_short"); branch created in: $(pwd)"
+    fi
+    git checkout -b "$branch" "${base:-$DEFAULT_BASE}" || \
+      fail "could not create branch '$branch' from '${base:-$DEFAULT_BASE}' (does it exist?)"
+    say "created local branch '$branch' (from ${base:-$DEFAULT_BASE})"
+  fi
+}
+
+# ---------------------------------------------------------------------------
+# command: pr
+# ---------------------------------------------------------------------------
+# Opens the PR implementing an issue: run from inside the target repo on the
+# feature branch (already pushed). Title from the issue; body starts with
+# "Closes #<n>" so the PR is auto-linked to the issue.
+
+cmd_pr() {
+  local repo_short="" issue="" draft=0 base="" force=0 title branch cur full body out
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --draft) draft=1; shift ;;
+      --base)  base="$2"; shift 2 ;;
+      --force) force=1; shift ;;
+      -h|--help) usage ;;
+      --*) fail "unknown option: $1" ;;
+      *)  # positional: "api 12" / "ui 12"
+        if [ -z "$repo_short" ] && { [ "$1" = api ] || [ "$1" = ui ]; }; then
+          repo_short="$1"
+        else
+          issue="$1"
+        fi
+        shift ;;
+    esac
+  done
+  [ -n "$issue" ] || fail "missing issue id (see --help)"
+  [ -n "$repo_short" ] || fail "could not determine repo (use 'api' or 'ui')"
+
+  require_gh
+  full="$(repo_full "$repo_short")"
+  if [ "$(pwd)" != "$(repo_local "$repo_short")" ]; then
+    fail "run from $(repo_local "$repo_short") — the PR is created for the branch checked out there"
+  fi
+
+  title="$(gh issue view "$issue" -R "$full" --json title -q .title 2>/dev/null)" \
+    || fail "issue #$issue not found on $full"
+  slug="$(slugify "$title")"
+  want="feat/$repo_short-$issue-$slug"
+  cur="$(git branch --show-current 2>/dev/null || true)"
+  if [ "$cur" != "$want" ]; then
+    if [ "$force" != 1 ]; then
+      fail "current branch '$cur' != expected '$want' (the branch for issue #$issue). Run with --force to PR anyway."
+    fi
+    say "warning: current branch '$cur' differs from expected '$want' (--force)"
+  fi
+
+  body="$(mktemp -t ghplan-pr.XXXXXX)"
+  {
+    echo "Closes #$issue"
+    comp="$(gh issue view "$issue" -R "$full" --json body -q .body 2>/dev/null \
+              | grep -m1 'Companion ticket')"
+    if [ -n "$comp" ]; then
+      echo
+      printf '%s\n' "$comp"
+    fi
+    echo
+    echo "_Opened with \`gh-plan pr\`._"
+  } > "$body"
+
+  [ -n "$base" ] || base="$DEFAULT_BASE"
+  args=(pr create -R "$full" --title "$title" --body-file "$body" --base "$base")
+  [ "$draft" = 1 ] && args+=(--draft)
+  say "creating PR in $full ($cur -> $base) …"
+  out="$(gh "${args[@]}" 2>&1)" || { rm -f "$body"; fail "gh pr create failed: $out"; }
+  rm -f "$body"
+  say "  $out"
+
+  # move the linked issue from 'plan' to 'in progress'
+  ensure_label "$repo_short" "$LABEL_PROGRESS" "$LABEL_PROGRESS_COLOR" "$LABEL_PROGRESS_DESC"
+  gh issue edit "$issue" -R "$full" --add-label "$LABEL_PROGRESS" >/dev/null 2>&1 \
+    && say "  labels: added '$LABEL_PROGRESS' to #$issue" \
+    || say "  warning: could not add '$LABEL_PROGRESS' to #$issue"
+  gh issue edit "$issue" -R "$full" --remove-label "$LABEL" >/dev/null 2>&1 \
+    && say "  labels: removed '$LABEL' from #$issue"
+}
+
+# ---------------------------------------------------------------------------
+# command: update
+# ---------------------------------------------------------------------------
+# Refresh an existing ticket's body from a (newer) plan doc. Keeps the title,
+# labels and companion cross-link; replaces summary + embedded document.
+
+cmd_update() {
+  local repo_short="" issue="" doc="" summary="" cur_body comp full out tmp
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --summary) summary="$2"; shift 2 ;;
+      -h|--help) usage ;;
+      --*) fail "unknown option: $1" ;;
+      *)  # positional: repo api|ui, then issue id, then plan doc
+        if [ -z "$repo_short" ] && { [ "$1" = api ] || [ "$1" = ui ]; }; then
+          repo_short="$1"
+        elif [ -z "$issue" ] && printf '%s' "$1" | grep -qE '^[0-9]+$'; then
+          issue="$1"
+        else
+          doc="$1"
+        fi
+        shift ;;
+    esac
+  done
+  [ -n "$repo_short" ] || fail "missing repo (api|ui) (see --help)"
+  [ -n "$issue" ] || fail "missing issue id (see --help)"
+  [ -f "$doc" ] || fail "file not found: $doc"
+
+  require_gh
+  full="$(repo_full "$repo_short")"
+  [ -n "$summary" ] || summary="$(derive_summary "$doc")"
+  cur_body="$(gh issue view "$issue" -R "$full" --json body -q .body 2>/dev/null)" \
+    || fail "issue #$issue not found on $full"
+  comp="$(printf '%s\n' "$cur_body" | grep -m1 'Companion ticket' || true)"
+
+  tmp="$(mktemp -t ghplan-update.XXXXXX)"
+  {
+    echo "## Summary"
+    echo
+    printf '%s\n' "$summary"
+    if [ -n "$comp" ]; then
+      echo
+      printf '%s\n' "$comp"
+    fi
+    echo
+    echo "---"
+    echo
+    echo "<details>"
+    echo "<summary>📄 Plan document</summary>"
+    echo
+    cat "$doc"
+    echo
+    echo "</details>"
+  } > "$tmp"
+
+  say "updating #$issue on $full …"
+  out="$(gh issue edit "$issue" -R "$full" --body-file "$tmp" 2>&1)" || {
+    rm -f "$tmp"; fail "gh issue edit failed: $out"
+  }
+  rm -f "$tmp"
+  say "  https://github.com/$full/issues/$issue"
+}
+
+# ---------------------------------------------------------------------------
+
+[ $# -eq 0 ] && usage
+sub="$1"; shift
+case "$sub" in
+  new)    cmd_new "$@" ;;
+  branch) cmd_branch "$@" ;;
+  pr)     cmd_pr "$@" ;;
+  update) cmd_update "$@" ;;
+  *) usage ;;
+esac

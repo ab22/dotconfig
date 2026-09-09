@@ -1,5 +1,6 @@
 # Brew
 eval "$(/opt/homebrew/bin/brew shellenv)"
+autoload -Uz compinit && compinit
 
 # Set vi mode
 set -o vi
@@ -19,6 +20,9 @@ export GOBIN=$GOPATH/bin
 export PATH=$PATH:$GOBIN
 # Rust
 export PATH=$PATH:~/.cargo/bin
+
+# Shared AI tooling (dotconfig/AI/bin — e.g. gh-plan)
+export PATH="$PATH:$HOME/code/dotconfig/AI/bin"
 
 # Neovim
 # export PATH=$PATH:/opt/nvim-linux64/bin
@@ -49,4 +53,4 @@ export MANWIDTH=90
 
 # Load direnv automatically
 eval "$(direnv hook zsh)"
-
+eval "$(task --completion zsh)"
