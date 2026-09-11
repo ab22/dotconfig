@@ -49,4 +49,5 @@
   },
   "chat.tips.enabled": false,
   "claudeCode.preferredLocation": "panel",
+  "chat.viewSessions.orientation": "stacked",
 }
