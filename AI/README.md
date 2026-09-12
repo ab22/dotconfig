@@ -26,8 +26,10 @@ gh-plan new <doc> [--repo api|ui|both] [--title ...] [--summary ...] [--keep] [-
 gh-plan branch <api|ui> <issue-id> [--create]
 ```
 
-Workflow + conventions live in each project's `.agents/TICKETS.md`
-(`serenity_api`, `serenity_ui`). Requires the `gh` CLI (authed).
+Workflow + conventions live in each project's `.agents/` (`serenity_api`,
+`serenity_ui`): `TICKETS.md` (this tool's lifecycle), `WORKFLOW.md` (gated
+plan → implement → review → PR), `TDD.md` and `BRANCHING.md`. Requires the `gh`
+CLI (authed).
 
 ## Install
 

@@ -4,6 +4,29 @@ Shared convention for feature branches and how pull requests get linked to (and
 close) GitHub Issues. Works for any repo in this workspace (`api` / `ui` are the
 short prefixes for `serenity_api` / `serenity_ui`).
 
+## Before you branch: sync `alpha`, check the tree
+
+Feature work always starts from a current `alpha` (the dev branch) unless the
+user specifies another base:
+
+```bash
+git fetch origin
+git checkout alpha
+git pull origin alpha          # alpha must carry the latest changes
+```
+
+Then create the ticket branch (see below).
+
+**Stop and notify the user — do not work around it — when:**
+
+- the pull reports **conflicts**,
+- there are **uncommitted or unstaged** files,
+- the branches have **diverged** (not a fast-forward).
+
+The user resolves the state and tells you where things stand; only then do you
+continue. Never `git stash`, `git reset --hard`, `git checkout -f`, or
+force-push to get past this.
+
 ## Issue-driven feature branches
 
 Feature work is always driven by a ticket (see `tickets.md`). Branch format:
@@ -24,7 +47,7 @@ Rules:
 - `<issue-id>` maps 1:1 to the ticket.
 - `<kebab-slug>` is the lowercased, dash-separated title, ≤ 30 chars (the tool
   truncates it), so the whole branch stays ≤ ~50 chars.
-- Start the branch from the ticket with the tool:
+- Branch from the ticket with the tool (never invent the name by hand):
 
   ```bash
   gh-plan branch api 14            # prints feat/api-14-inventory-adjustments
@@ -52,12 +75,17 @@ fix/<kebab-slug>      e.g. fix/org-picker-reset
 chore/<kebab-slug>    e.g. chore/ci-node-version
 ```
 
-Prefer creating a ticket over using these — issues are the source of truth.
+Prefer creating a ticket over using these — issues are the source of truth, and
+a PR with no issue to close cannot be opened without the user's explicit
+go-ahead.
 
 ## Linking a PR to its issue
 
 A branch name does **not** link a PR to an issue. GitHub links them through the
 PR description (closing keywords) or the issue's Development sidebar.
+
+Open the PR **only after the user has reviewed and approved the work** (see
+`workflow.md`).
 
 - **Own repo:** start the PR body with `Closes #<issue-id>` — on merge GitHub
   auto-closes that repo's issue. Each repo has its own counter, so `Closes #7`
@@ -74,6 +102,9 @@ PR description (closing keywords) or the issue's Development sidebar.
 
   It validates you are on the expected `feat/…` branch for the issue and that
   you run it from inside the correct repo.
+
+- **No issue → no PR.** If the work has no ticket, notify the user and wait for
+  instructions instead of opening an orphan PR.
 
 - Supported keywords: `Closes`, `Fixes`, `Resolves` (also `… #id` multiple or
   `owner/repo#id` forms for cross-repo references).

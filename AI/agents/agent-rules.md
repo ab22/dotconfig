@@ -7,11 +7,14 @@ most there; this module is the canonical, general version.
 ## Defaults
 
 - **When in doubt, never assume — ask for guidance.**
+- Follow the shared lifecycle **plan → implement → review → PR** (`workflow.md`);
+  the user owns the planning and review gates.
 - Break work into **phases**, and execute phases **one at a time**.
-- Prefer **Test-Driven Development** (see `tdd.md`): tests first, `TDD
-  CHECKPOINT` commit, then implement to green.
-- **Do not create commits for the user** — they review and commit their own
-  work (the `TDD CHECKPOINT` commit is the documented exception).
+- Prefer **Test-Driven Development** (see `tdd.md`): write the failing test, run
+  it, confirm it fails for the expected reason, and hand it to the user before
+  implementing.
+- **The user makes all commits** — agents never run `git commit` or `git push`.
+  There is no checkpoint-commit exception.
 - Keep answers and changes minimal and focused on the request.
 
 ## Documentation & tickets
@@ -20,9 +23,14 @@ most there; this module is the canonical, general version.
   `gh-plan new <doc>` (see `tickets.md`) and delete the local copy.
 - Plans affecting both `serenity_api` and `serenity_ui` become **two** tickets
   (one per repo), each embedding the same document, cross-linked.
-- Start implementation from a ticket on `feat/<prefix>-<id>-<slug>` and open
-  the PR with `gh-plan pr` so the issue is linked (`Closes #<id>`) — see
-  `branching.md`.
+- Plans are **split into phases** with Test-Driven Design among the first, and
+  always end with the **closing phases** (more unit tests, integration tests,
+  Postman/E2E updates) — see `workflow.md`.
+- Before implementing: confirm the ticket exists (create it if not) and branch
+  from an up-to-date `alpha`; on conflicts or a dirty tree, stop and notify the
+  user (`branching.md`).
+- Open the PR with `gh-plan pr` **only after the user has reviewed and approved
+  the work**, and never without a ticket — see `branching.md`.
 - The **ticket/plan is the source of truth**; don't silently re-derive design
   decisions recorded there.
 
@@ -42,5 +50,6 @@ most there; this module is the canonical, general version.
 | serenity_ui | Angular 17 + PrimeNG, Spanish-only | `/Users/abe/code/serenity_ui` | `main` |
 | dotconfig | shared dotfiles + `AI/` tooling + agent modules | `/Users/abe/code/dotconfig` | `main` |
 
-Release flow: **alpha (dev) → beta (staging) → main (production)**. Feature PRs
-target `alpha`; releases promote up the chain (`alpha → beta → main`).
+Release flow: **alpha (dev) → beta (staging) → main (production)**. Feature
+branches are cut from `alpha` and their PRs target `alpha`; releases promote up
+the chain (`alpha → beta → main`).

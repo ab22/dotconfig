@@ -1,36 +1,30 @@
 version: "3"
 
+# One entry point per concern — every task auto-detects the platform
+# (macos | archlinux) via scripts/detect-os.sh, so the same command works on
+# every machine. To target a platform explicitly, call the script directly:
+#   scripts/gen.sh macos
+#   scripts/link.sh archlinux
+
 tasks:
-  gen-linux:
-    desc: Generate all linux-specific config artifacts
-    deps: [gen-zed-linux]
-
-  gen-zed-linux:
-    desc: Merge zed base + overrides into linux specific artifacts
+  default:
+    desc: List available tasks
+    silent: true
     cmds:
-      - jq -s '.[0] * .[1]' zed/settings.base.json zed/settings.linux_overrides.json > zed/settings.json
-      - jq -s '.[0] + .[1]' zed/keymap.base.json zed/keymap.linux_overrides.json > zed/keymap.json
-      - jq -s '.[0] + .[1]' zed/tasks.base.json zed/tasks.linux_overrides.json > zed/tasks.json
+      - task --list
 
-  gen-mac:
-    desc: Generate all mac specific config artifacts
-    deps: [gen-zed-mac]
-
-  gen-zed-mac:
-    desc: Merge zed base + overrides into mac specific artifacts
+  gen:
+    desc: Generate OS-specific config artifacts (auto-detects macos/archlinux)
     cmds:
-      - jq -s '.[0] * .[1]' zed/settings.base.json zed/settings.mac_overrides.json > zed/settings.json
-      - jq -s '.[0] + .[1]' zed/keymap.base.json zed/keymap.mac_overrides.json > zed/keymap.json
-      - jq -s '.[0] + .[1]' zed/tasks.base.json zed/tasks.mac_overrides.json > zed/tasks.json
+      - scripts/gen.sh
 
   link:
-    desc: Create all symlinks for OS-specific configs
-    deps: [link-zed]
-
-  link-zed:
-    desc: Symlink zed generated configs into ~/.config/zed
+    desc: Symlink dotfiles, generated configs, and global AI agent files into $HOME
     cmds:
-      - mkdir -p $HOME/.config/zed
-      - ln -sf {{.TASKFILE_DIR}}/zed/settings.json $HOME/.config/zed/settings.json
-      - ln -sf {{.TASKFILE_DIR}}/zed/keymap.json $HOME/.config/zed/keymap.json
-      - ln -sf {{.TASKFILE_DIR}}/zed/tasks.json $HOME/.config/zed/tasks.json
+      - scripts/link.sh
+
+  install:
+    desc: Full machine setup — generate artifacts, then create every symlink
+    cmds:
+      - task: gen
+      - task: link

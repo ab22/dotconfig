@@ -1,14 +1,19 @@
 # Plan docs → GitHub Issues (ticket workflow)
 
-Canonical shared module. Adopted by `serenity_api` and `serenity_ui` (each as
-`.agents/TICKETS.md`, a relative symlink to this file). Tooling: `gh-plan`
-(canonical in `ab22/dotconfig` → `AI/bin/gh-plan`, on `$PATH`).
+Canonical shared module, **vendored** into each repo as `.agents/TICKETS.md`
+(real files, not symlinks — see `README.md`). Tooling: `gh-plan`, canonical in
+`ab22/dotconfig` → `AI/bin/gh-plan`, vendored into each repo at `scripts/gh-plan`.
+
+> **Where `gh-plan` lives:** the examples below write `gh-plan` for brevity. In a
+> repo that vendors it, run `./scripts/gh-plan …`.
 
 Plans and wireframes are **filed as GitHub Issues**, not kept as the source of
 truth in `docs/`. A ticket's description is a short summary; the **full plan
 document is embedded** at the bottom of the description inside a collapsible
 `<details>` block (GitHub Issues have no file attachments, so "attach" =
 "embed"). The ticket doubles as the **implementation ticket**.
+
+Stage-by-stage gates live in `workflow.md`; branch naming in `branching.md`.
 
 ## Repos
 
@@ -32,8 +37,12 @@ document is embedded** at the bottom of the description inside a collapsible
    blockquote also works). If it is missing, the tool defaults to **both** and
    prints a note.
 
-2. **File the ticket(s)** — `gh-plan` is on `$PATH` (repo-agnostic), so it
-   works from any repo and any cwd:
+   The doc must be split into **phases** with Test-Driven Design among the first
+   and the closing phases (extra unit tests, integration tests, Postman/E2E
+   updates) at the end — see `workflow.md`.
+
+2. **File the ticket(s)** — run the vendored `./scripts/gh-plan` (works from
+   any cwd):
 
    ```bash
    gh-plan new docs/my-plan.md                # → api + ui tickets
@@ -51,17 +60,41 @@ document is embedded** at the bottom of the description inside a collapsible
    - prints the issue URLs and the **implementation branch names**,
    - **deletes the local `docs/` file** (pass `--keep` to keep it).
 
-3. **Implement** by picking up the ticket. Start from the branch the tool
+3. **Implement** by picking up the ticket. First confirm the ticket exists — if
+   the user asks to implement a plan that has no issue, file it first (step 2,
+   `gh-plan new`) before writing any code. Then create the branch the tool
    printed (see `branching.md`), read the full plan from the ticket body
    (`gh issue view <id> -R ab22/serenity_<repo>`), and follow the repo's
-   `.agents/` + TDD conventions.
+   `.agents/` workflow (phases one at a time, TDD tests first) — never a local
+   `docs/` copy.
 
-4. **Open the linked PR** (do not forget the link!):
+4. **Review gate, then open the linked PR.** When the plan is implemented,
+   **stop** and let the user review; only once the user confirms everything is
+   good do you open the PR (do not forget the link!):
 
    ```bash
    gh-plan pr api 14            # run from serenity_api on the feature branch
    gh-plan pr ui 7 --draft      # body starts with "Closes #7" → auto-link
    ```
+
+   If the work has **no issue**, do not open a PR: notify the user and wait for
+   instructions.
+
+## Picking up a ticket (implementation preconditions)
+
+Before any implementation starts:
+
+1. **A ticket exists.** If the plan is still only a local doc, file it first
+   (`gh-plan new`) — the ticket is the source of truth and the PR needs
+   something to close.
+2. **`alpha` is current.** `git fetch origin && git checkout alpha && git pull
+   origin alpha` — feature work always branches from `alpha` unless the user
+   says otherwise.
+3. **The tree is clean.** If the pull conflicts, or there are uncommitted or
+   unstaged files, stop and notify the user. The user resolves it and reports
+   where things stand; only then create the branch.
+4. **The branch comes from the ticket** (`gh-plan branch <api|ui> <id>
+   --create`), so PR↔issue linking works.
 
 ## Issue labels (lifecycle)
 
@@ -104,9 +137,16 @@ brew install gh        # GitHub CLI
 gh auth login          # browser; needed once — grants repo + issues scope
 ```
 
-`gh-plan` needs `ab22/dotconfig` cloned at `~/code/dotconfig` (its `AI/bin` is
-on `$PATH` via `root/<os>/.zshrc`). If it is not on `$PATH`, run
-`~/code/dotconfig/AI/bin/gh-plan` directly.
+`gh-plan` is **vendored into each repo** at `scripts/gh-plan`, so no extra
+checkout is required:
+
+```bash
+./scripts/gh-plan new docs/my-plan.md --repo api
+```
+
+It resolves the local clones from `$HOME/code/serenity_api` and
+`$HOME/code/serenity_ui`; override with `SERENITY_API_LOCAL` /
+`SERENITY_UI_LOCAL` when your layout differs.
 
 The tool fails with a clear message if `gh` is missing or unauthenticated.
 
@@ -117,6 +157,8 @@ The tool fails with a clear message if `gh` is missing or unauthenticated.
 - A plan affecting **both** repos always produces **two tickets** (one per
   repo), each with the full document embedded and a companion cross-link, so
   each repo's implementing agent has self-contained context.
+- No ticket, no implementation and no PR: create the ticket first, and if a PR
+  would have no issue to close, stop and ask the user.
 
 ## Updating a plan that already has a ticket
 
