@@ -73,5 +73,19 @@ link "$repo/AI/AGENTS.md" "$home/.dsh/AGENTS.md"     # DeepSeek Harness (user-gl
 link "$repo/AI/AGENTS.md" "$home/.claude/CLAUDE.md"  # Claude Code (user memory)
 link "$repo/AI/skills"    "$home/.agents/skills"     # DSH skill root (~/.agents/skills)
 
+# ---------------------------------------------------------------------------
+# 4. agent-toolkit commands — exposed on PATH through AI/bin, which
+#    root/<os>/.zshrc already exports and non-interactive agent shells inherit.
+# ---------------------------------------------------------------------------
+toolkit_bin="$HOME/code/agent-toolkit/bin"
+if [ -d "$toolkit_bin" ]; then
+  for tool in "$toolkit_bin"/*; do
+    [ -f "$tool" ] || continue
+    link "$tool" "$repo/AI/bin/$(basename "$tool")"
+  done
+else
+  echo "link: note — $toolkit_bin not found; skipping agent-toolkit commands"
+fi
+
 echo
 echo "link: done — $linked linked, $skipped skipped"
