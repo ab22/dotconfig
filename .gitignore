@@ -3,8 +3,3 @@ zed/settings.json
 zed/keymap.json
 zed/tasks.json
 
-# agent-toolkit commands symlinked into AI/bin by scripts/link.sh
-AI/bin/plan
-AI/bin/preflight
-AI/bin/handoff
-AI/bin/dod

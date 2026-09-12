@@ -1,37 +1,39 @@
-# AI (shared agent tooling)
+# AI (agent configuration)
 
-Shared, repo-agnostic tooling for AI coding agents working across projects.
-Scripts here are exposed on `$PATH` (see `root/<os>/.zshrc`), so agents can run
-them from any repo without a `./scripts/...` path.
+Shared, repo-agnostic agent configuration used across projects: the global
+`AGENTS.md`, the skills, and the instruction modules that a project's `AGENTS.md`
+/ `.agents/` files reference.
+
+**CLI tools do not live here.** They are a separate repository
+(`agent-toolkit`) installed as regular user binaries into `~/.local/bin`; see its
+`README.md`.
 
 ## Layout
 
 | Path | Purpose |
 | --- | --- |
-| `bin/` | Executable scripts on `$PATH`. |
-| `agents/` | shared agent-instruction modules that project `AGENTS.md` /
-`.agents/` files can reference. |
+| `AGENTS.md` | The machine-global agent baseline (symlinked to `~/AGENTS.md`, `~/.dsh/AGENTS.md`, `~/.claude/CLAUDE.md`). |
+| `agents/` | Shared agent-instruction modules that project `AGENTS.md` / `.agents/` files can reference. |
+| `skills/` | DSH skills (symlinked to `~/.agents/skills`). |
 
-## Current tools
+## Tools
 
-### `gh-plan` — file plan docs as GitHub Issues
-
-Turns a plan/wireframe doc into ticket(s) on `ab22/serenity_api` / `ab22/serenity_ui`
-(title + summary + the full doc embedded in the body, `plan` label, companion
-cross-links when it files both, then deletes the local doc). Also derives the
-implementation branch name (`feat/api-<n>-<slug>` / `feat/ui-<n>-<slug>`).
+`gh-plan`, `plan`, `preflight`, `handoff` and `dod` ship in `agent-toolkit`:
 
 ```bash
-gh-plan new <doc> [--repo api|ui|both] [--title ...] [--summary ...] [--keep] [--dry-run]
-gh-plan branch <api|ui> <issue-id> [--create]
+cd ~/code/agent-toolkit && task install     # → ~/.local/bin
+task verify-install                         # after a shell/harness restart
 ```
 
-Workflow + conventions live in each project's `.agents/` (`serenity_api`,
-`serenity_ui`): `TICKETS.md` (this tool's lifecycle), `WORKFLOW.md` (gated
-plan → implement → review → PR), `TDD.md` and `BRANCHING.md`. Requires the `gh`
-CLI (authed).
+`gh-plan` is additionally vendored into each project repo at `scripts/gh-plan`,
+so a plain clone needs no extra checkout.
 
 ## Install
 
-Ensure this repo is cloned at `~/code/dotconfig` and the `.zshrc` exports
-`$HOME/code/dotconfig/AI/bin` on `$PATH`; then open a new shell.
+```bash
+cd ~/code/dotconfig && task install
+```
+
+Links the global agent files, the skills, the shell profiles (including
+`~/.local/bin` on `$PATH`) and the editor configs, and runs the `agent-toolkit`
+installer when that repo is present.

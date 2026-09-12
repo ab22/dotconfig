@@ -16,9 +16,7 @@ export PATH=$PATH:$GOBIN
 # Rust
 export PATH=$PATH:~/.cargo/bin
 
-# Shared AI tooling (dotconfig/AI/bin — e.g. gh-plan)
-export PATH="$PATH:$HOME/code/dotconfig/AI/bin"
-# agent-toolkit (plan, preflight, handoff, dod)
+# agent-toolkit binaries (gh-plan, plan, preflight, handoff, dod)
 export PATH="$PATH:$HOME/.local/bin"
 
 # Neovim

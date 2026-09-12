@@ -74,17 +74,14 @@ link "$repo/AI/AGENTS.md" "$home/.claude/CLAUDE.md"  # Claude Code (user memory)
 link "$repo/AI/skills"    "$home/.agents/skills"     # DSH skill root (~/.agents/skills)
 
 # ---------------------------------------------------------------------------
-# 4. agent-toolkit commands — exposed on PATH through AI/bin, which
-#    root/<os>/.zshrc already exports and non-interactive agent shells inherit.
+# 4. agent-toolkit — installed as regular user binaries into ~/.local/bin by the
+#    toolkit's own installer, which root/<os>/.zshrc puts on $PATH.
 # ---------------------------------------------------------------------------
-toolkit_bin="$HOME/code/agent-toolkit/bin"
-if [ -d "$toolkit_bin" ]; then
-  for tool in "$toolkit_bin"/*; do
-    [ -f "$tool" ] || continue
-    link "$tool" "$repo/AI/bin/$(basename "$tool")"
-  done
+toolkit="$HOME/code/agent-toolkit"
+if [ -x "$toolkit/scripts/install.sh" ]; then
+  bash "$toolkit/scripts/install.sh" | sed 's/^/  /'
 else
-  echo "link: note — $toolkit_bin not found; skipping agent-toolkit commands"
+  echo "link: note — $toolkit not found; skipping the agent-toolkit install"
 fi
 
 echo

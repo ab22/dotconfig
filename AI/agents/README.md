@@ -50,6 +50,6 @@ it before the relevant task.
 ## Prerequisites
 
 These modules assume the GitHub CLI is installed and authenticated, and that a
-`gh-plan` binary is available. Canonical source: `AI/bin/gh-plan`. It is being
-vendored into each consuming repo so teammates do not need this repo checked out
-(see `tickets.md`).
+`gh-plan` binary is available — it ships in the `agent-toolkit` repo and is
+vendored into each consuming repo at `scripts/gh-plan`, so teammates need no
+extra checkout (see `tickets.md`).
