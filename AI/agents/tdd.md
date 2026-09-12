@@ -22,9 +22,12 @@ behaviour that has no failing test.
 
 ## Commits: the user owns all of them
 
-- **The user makes every commit.** Agents must not run `git commit`, `git push`,
-  or `git tag` — there is **no `TDD CHECKPOINT` exception**. If a red test is
-  worth checkpointing, hand it to the user and let them decide whether to commit.
+- **The user makes every commit.** Agents must not run `git commit` or `git tag`
+  — there is **no `TDD CHECKPOINT` exception**. If a red test is worth
+  checkpointing, hand it to the user and let them decide whether to commit.
+- **Push only on the go-ahead.** Once the user has reviewed, committed, and said
+  to proceed, push the feature branch and open the PR. Never push `alpha`,
+  `beta`, or `main`.
 - When a phase reaches green, leave the working tree for the user to review, and
   report which files changed and the verification results.
 

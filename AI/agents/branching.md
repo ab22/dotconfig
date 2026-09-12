@@ -84,8 +84,9 @@ go-ahead.
 A branch name does **not** link a PR to an issue. GitHub links them through the
 PR description (closing keywords) or the issue's Development sidebar.
 
-Open the PR **only after the user has reviewed and approved the work** (see
-`workflow.md`).
+Push the branch and open the PR **only after the user has reviewed, committed,
+and approved the work** (see `workflow.md`). Push the feature branch the PR opens
+from; never push `alpha`, `beta`, or `main`.
 
 - **Own repo:** start the PR body with `Closes #<issue-id>` — on merge GitHub
   auto-closes that repo's issue. Each repo has its own counter, so `Closes #7`

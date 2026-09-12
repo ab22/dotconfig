@@ -1,8 +1,7 @@
 # Plan docs → GitHub Issues (ticket workflow)
 
-Canonical shared module, **vendored** into each repo as `.agents/TICKETS.md`
-(real files, not symlinks — see `README.md`). Tooling: `gh-plan`, canonical in
-`ab22/dotconfig` → `AI/bin/gh-plan`, vendored into each repo at `scripts/gh-plan`.
+This module is copied into each repo as `.agents/TICKETS.md`. Tooling:
+`gh-plan`, copied into each repo at `scripts/gh-plan`.
 
 > **Where `gh-plan` lives:** the examples below write `gh-plan` for brevity. In a
 > repo that vendors it, run `./scripts/gh-plan …`.
@@ -68,9 +67,10 @@ Stage-by-stage gates live in `workflow.md`; branch naming in `branching.md`.
    `.agents/` workflow (phases one at a time, TDD tests first) — never a local
    `docs/` copy.
 
-4. **Review gate, then open the linked PR.** When the plan is implemented,
-   **stop** and let the user review; only once the user confirms everything is
-   good do you open the PR (do not forget the link!):
+4. **Review gate, then push and open the linked PR.** When the plan is
+   implemented, **stop** and let the user review and commit; only once the user
+   confirms and says to proceed do you push the feature branch and open the PR
+   (do not forget the link!):
 
    ```bash
    gh-plan pr api 14            # run from serenity_api on the feature branch

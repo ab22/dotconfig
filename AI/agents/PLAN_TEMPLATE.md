@@ -63,10 +63,3 @@ them even when the user did not ask for them.
 ## Risks / follow-ups
 
 <What could go wrong; what is deliberately deferred to a later plan.>
-
----
-
-<!--
-Vendored template from ab22/dotconfig (AI/agents). Do not edit the header/structure
-in a copy casually — improve the canonical template and re-vendor it.
--->

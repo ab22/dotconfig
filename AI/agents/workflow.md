@@ -63,11 +63,13 @@ A plan that changes no behaviour still ends with an explicit verification phase.
 
 ## 3. Review and PR
 
-- When implementation is done, **stop**. Do not push, do not open a PR. Report
-  what changed, what was verified, and anything left open, then wait.
+- When implementation is done, **stop**. Do not commit, do not push, and do not
+  open a PR yet. Report what changed, what was verified, and anything left open,
+  then wait for the user to review and commit.
 - Apply review feedback and re-run verification after every change.
-- **Only after the user confirms everything is good**, open the PR against the
-  existing issue:
+- **Only after the user confirms everything is good**, push the feature branch
+  and open the PR against the existing issue. Push the branch the PR opens from —
+  never `alpha`, `beta`, or `main`:
   - the PR body must link the ticket (`Closes #<id>`; `gh-plan pr` pre-fills it),
   - the base branch is `alpha` (or whatever the user specified),
   - cross-repo plans add the companion ticket line (`branching.md`).

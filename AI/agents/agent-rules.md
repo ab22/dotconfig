@@ -13,8 +13,11 @@ most there; this module is the canonical, general version.
 - Prefer **Test-Driven Development** (see `tdd.md`): write the failing test, run
   it, confirm it fails for the expected reason, and hand it to the user before
   implementing.
-- **The user makes all commits** — agents never run `git commit` or `git push`.
-  There is no checkpoint-commit exception.
+- **The user makes all commits** — agents never run `git commit`. There is no
+  checkpoint-commit exception.
+- **Push and open the PR only on the user's go** — after they review, commit, and
+  say to proceed, push the feature branch and open the PR. Never push `alpha`,
+  `beta`, or `main`.
 - Keep answers and changes minimal and focused on the request.
 
 ## Documentation & tickets
