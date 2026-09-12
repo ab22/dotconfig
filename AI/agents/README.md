@@ -21,11 +21,11 @@ The cost is drift. The rule:
 
 | Module | What it covers | Vendored into |
 | --- | --- | --- |
-| `workflow.md` | End-to-end lifecycle **plan → implement → review → PR**, its gates, and the mandatory closing phases | `serenity_api` (`.agents/WORKFLOW.md`) |
-| `tickets.md` | Plan/design docs → GitHub Issues; `gh-plan` lifecycle (`new`/`branch`/`pr`) | `serenity_api` (`.agents/TICKETS.md`), `serenity_ui` |
-| `branching.md` | Feature-branch naming, `alpha` base + sync rules, how PRs link to issues | `serenity_api` (`.agents/BRANCHING.md`) |
-| `tdd.md` | Test-Driven Development: failing test → hand to user → implement; the user owns all commits | `serenity_api` (`.agents/TDD.md`) |
-| `PLAN_TEMPLATE.md` | The required plan skeleton: TDD-first phase plus the mandatory closing phases | `serenity_api` (`.agents/PLAN_TEMPLATE.md`) |
+| `workflow.md` | End-to-end lifecycle **plan → implement → review → PR**, its gates, and the mandatory closing phases | `serenity_api`, `serenity_ui` (`.agents/WORKFLOW.md`) |
+| `tickets.md` | Plan/design docs → GitHub Issues; `gh-plan` lifecycle (`new`/`branch`/`pr`) | `serenity_api`, `serenity_ui` (`.agents/TICKETS.md`) |
+| `branching.md` | Feature-branch naming, `alpha` base + sync rules, how PRs link to issues | `serenity_api`, `serenity_ui` (`.agents/BRANCHING.md`) |
+| `tdd.md` | Test-Driven Development: failing test → hand to user → implement; the user owns all commits | `serenity_api`, `serenity_ui` (`.agents/TDD.md`) |
+| `PLAN_TEMPLATE.md` | The required plan skeleton: TDD-first phase plus the mandatory closing phases | `serenity_api`, `serenity_ui` (`.agents/PLAN_TEMPLATE.md`) |
 | `agent-rules.md` | Cross-cutting agent behaviour (phases, no commits, verification, tickets, gates) | (canonical reference) |
 
 Repo-specific rules (commands, Definition of Done, stack guidance) are **not**
