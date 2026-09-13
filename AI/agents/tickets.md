@@ -69,8 +69,8 @@ Stage-by-stage gates live in `workflow.md`; branch naming in `branching.md`.
 
 4. **Review gate, then push and open the linked PR.** When the plan is
    implemented, **stop** and let the user review and commit; only once the user
-   confirms and says to proceed do you push the feature branch and open the PR
-   (do not forget the link!):
+   confirms and says to proceed — or as part of an explicit one-go request — do
+   you push the feature branch and open the PR (do not forget the link!):
 
    ```bash
    gh-plan pr api 14            # run from serenity_api on the feature branch

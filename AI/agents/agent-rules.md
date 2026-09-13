@@ -13,11 +13,14 @@ most there; this module is the canonical, general version.
 - Prefer **Test-Driven Development** (see `tdd.md`): write the failing test, run
   it, confirm it fails for the expected reason, and hand it to the user before
   implementing.
-- **The user makes all commits** — agents never run `git commit`. There is no
-  checkpoint-commit exception.
-- **Push and open the PR only on the user's go** — after they review, commit, and
-  say to proceed, push the feature branch and open the PR. Never push `alpha`,
-  `beta`, or `main`.
+- **The user makes all commits by default** — agents do not run `git commit`.
+  The one exception is an explicit request for the *whole flow in one go*
+  ("commit, push, open the PR and merge"); do not infer it from "push and merge"
+  alone. There is still no checkpoint-commit exception.
+- **Push and open the PR only on the user's go** — normally after they review,
+  commit, and say to proceed; as part of an explicit one-go request otherwise.
+  Push the feature branch the PR opens from; never push `alpha`, `beta`, or
+  `main`.
 - Keep answers and changes minimal and focused on the request.
 
 ## Documentation & tickets

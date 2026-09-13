@@ -16,9 +16,11 @@ Keep this file short — it is always in context.
 - **Tests first (TDD).** Write the failing test, run it, confirm it fails for
   the expected reason, then hand it to the user with the red output and wait for
   approval. Never write production code for a behaviour that has no failing test.
-- **The user makes all commits.** Never run `git commit` or `git tag`. You push
-  only after the user has reviewed, committed, and told you to go — then push the
-  feature branch and open the PR. Never push `alpha`, `beta`, or `main`.
+- **The user makes all commits by default.** Never run `git commit` or `git tag`
+  *unless* the user explicitly asks for the whole flow in one go (commit → push →
+  PR → merge). Otherwise you push only after the user has reviewed, committed,
+  and told you to go — then push the feature branch and open the PR. Never push
+  `alpha`, `beta`, or `main`.
 - Keep changes minimal and focused on the request.
 
 ## The gated lifecycle

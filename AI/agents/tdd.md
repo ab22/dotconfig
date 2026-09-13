@@ -20,14 +20,18 @@ this workspace (they complement repo-specific guidance such as
 Tests-first is not a formality: production code must never be written for a
 behaviour that has no failing test.
 
-## Commits: the user owns all of them
+## Commits: the user owns them by default
 
-- **The user makes every commit.** Agents must not run `git commit` or `git tag`
-  — there is **no `TDD CHECKPOINT` exception**. If a red test is worth
-  checkpointing, hand it to the user and let them decide whether to commit.
+- **The user makes every commit by default.** Agents must not run `git commit`
+  or `git tag` — there is **no `TDD CHECKPOINT` exception**. If a red test is
+  worth checkpointing, hand it to the user and let them decide whether to commit.
+- **The one exception: an explicit one-go request.** If the user asks for the
+  whole flow in one go ("commit, push, open the PR and merge"), the agent may
+  commit as part of it. Never infer this from "push and merge" on its own — the
+  request has to cover committing.
 - **Push only on the go-ahead.** Once the user has reviewed, committed, and said
-  to proceed, push the feature branch and open the PR. Never push `alpha`,
-  `beta`, or `main`.
+  to proceed — or as part of an explicit one-go request — push the feature branch
+  and open the PR. Never push `alpha`, `beta`, or `main`.
 - When a phase reaches green, leave the working tree for the user to review, and
   report which files changed and the verification results.
 

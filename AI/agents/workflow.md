@@ -59,17 +59,20 @@ A plan that changes no behaviour still ends with an explicit verification phase.
 - Execute the plan's phases **one at a time**; verify each phase before starting
   the next (see `tdd.md`).
 - Keep the ticket's phase order; do not silently re-derive the design.
-- **The user makes all commits** — see `tdd.md`.
+- **The user makes all commits by default** — see `tdd.md` for the single
+  exception: an explicit request to run the whole flow in one go.
 
 ## 3. Review and PR
 
 - When implementation is done, **stop**. Do not commit, do not push, and do not
   open a PR yet. Report what changed, what was verified, and anything left open,
-  then wait for the user to review and commit.
+  then wait for the user to review and commit — unless the user asked for the
+  whole flow in one go before the work started, in which case follow that.
 - Apply review feedback and re-run verification after every change.
-- **Only after the user confirms everything is good**, push the feature branch
-  and open the PR against the existing issue. Push the branch the PR opens from —
-  never `alpha`, `beta`, or `main`:
+- **Only after the user confirms everything is good** — or as part of an
+  explicit one-go request — push the feature branch and open the PR against the
+  existing issue. Push the branch the PR opens from — never `alpha`, `beta`, or
+  `main`:
   - the PR body must link the ticket (`Closes #<id>`; `gh-plan pr` pre-fills it),
   - the base branch is `alpha` (or whatever the user specified),
   - cross-repo plans add the companion ticket line (`branching.md`).
