@@ -27,9 +27,18 @@ The cost is drift. The rule:
 | `tdd.md` | Test-Driven Development: failing test → hand to user → implement; the user owns all commits | `serenity_api`, `serenity_ui` (`.agents/TDD.md`) |
 | `PLAN_TEMPLATE.md` | The required plan skeleton: TDD-first phase plus the mandatory closing phases | `serenity_api`, `serenity_ui` (`.agents/PLAN_TEMPLATE.md`) |
 | `agent-rules.md` | Cross-cutting agent behaviour (phases, no commits, verification, tickets, gates) | (canonical reference) |
+| `rust.md` | Language-level Rust conventions: prefer closed-set enums over raw strings, single-source-of-truth string mapping, parse at the boundary, error → HTTP mapping | `serenity_api` (folded into its repo-specific `.agents/RUST.md`) |
 
 Repo-specific rules (commands, Definition of Done, stack guidance) are **not**
 shared — they live in each repo's own `AGENTS.md` and `.agents/` files.
+
+> **Exception — `rust.md` is not vendored byte-identically.** Unlike the
+> lifecycle modules above, it carries *language-level* rules that a Rust repo
+> **folds into** its own repo-specific `.agents/RUST.md`, which also holds its
+> concrete wiring (its error enums, its HTTP mapping, its database layer).
+> Those two files are therefore deliberately **not** copies of each other: edit
+> the generic rule here, then port it into each repo's `RUST.md` by hand. Do not
+> run the `cp` + `diff` drift check on `rust.md`.
 
 ## How to vendor a module into a repo
 

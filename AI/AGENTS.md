@@ -40,10 +40,25 @@ Keep this file short — it is always in context.
    branch and open the PR. Never push `alpha`, `beta`, or `main`, and never open
    a PR with no ticket to close.
 
+## Continuous improvement
+
+- **If a session hits friction DSH could remove — repeated long commands, a
+  spilled or pruned tool result, manual fan-out, a limit you worked around —
+  finish the task, then suggest at most one concrete DSH capability and what it
+  would have saved.** Name a tool or setting you have verified exists in this
+  install (never guess a package name), route it to the right lever (agent rules
+  → this file or the repo's `.agents/`; harness config → `~/.dsh/settings.yaml`
+  or `~/.dsh/profiles/<p>/cordis.patch.yml`; capability gap → a note for the DSH
+  checkout), and skip it if there was no friction. Never block or detour from the
+  task for a suggestion.
+
 ## Before you start in a repo
 
 1. Read the repo's `AGENTS.md`.
 2. Follow the `.agents/` files it points to for the task at hand.
+3. For anything touching empty strings, `null`/`None` or `undefined`, follow
+   `~/code/dotconfig/AI/agents/validation.md` (the four boundaries, the required
+   test cases).
 
 ## Skills
 
