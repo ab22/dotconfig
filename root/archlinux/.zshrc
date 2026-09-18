@@ -1,3 +1,6 @@
+# Active Hook
+eval "$(direnv hook zsh)"
+
 # Set vi mode
 set -o vi
 bindkey -M vicmd '/' history-incremental-search-backward
