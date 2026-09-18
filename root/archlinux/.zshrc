@@ -48,3 +48,34 @@ export MANWIDTH=90
 
 # Autocompletion for go-task
 eval "$(task --completion zsh)"
+
+mount-bitlocker() {
+    mountpoint -q /mnt/hdd && { echo "Already mounted"; return 0; }
+
+    sudo bash -c '
+        pw=$(cat /root/hdd-password.txt)
+        dislocker /dev/sda1 --user-password="$pw" -- /mnt/bitlocker &
+        dislocker_pid=$!
+
+        for i in $(seq 1 20); do
+            [ -e /mnt/bitlocker/dislocker-file ] && break
+            sleep 0.5
+        done
+
+        if [ ! -e /mnt/bitlocker/dislocker-file ]; then
+            echo "dislocker failed to create the file" >&2
+            kill "$dislocker_pid" 2>/dev/null
+            exit 1
+        fi
+
+        mount -o loop /mnt/bitlocker/dislocker-file /mnt/hdd &&
+        echo "Mounted at /mnt/hdd (dislocker PID $dislocker_pid)"
+    '
+}
+
+umount-bitlocker() {
+    sudo umount /mnt/hdd && \
+    sudo umount /mnt/bitlocker && \
+    sudo pkill -f "dislocker /dev/sda1" 2>/dev/null
+    echo "Unmounted"
+}
