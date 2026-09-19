@@ -14,11 +14,11 @@ Shared, repo-agnostic agent configuration used across projects: the global
 | --- | --- |
 | `AGENTS.md` | The machine-global agent baseline (symlinked to `~/AGENTS.md`, `~/.dsh/AGENTS.md`, `~/.claude/CLAUDE.md`). |
 | `agents/` | Shared agent-instruction modules that project `AGENTS.md` / `.agents/` files can reference. |
-| `skills/` | DSH skills (symlinked to `~/.agents/skills`). |
+| `skills/` | DSH skills (symlinked to `~/.agents/skills`): `test-driven-development`, `authoring-agent-files`, `code-review-and-quality`. |
 
 ## Tools
 
-`gh-plan`, `plan`, `preflight`, `handoff` and `dod` ship in `agent-toolkit`:
+`gh-plan`, `plan`, `preflight`, `handoff`, `dod` and `check-skills` ship in `agent-toolkit`:
 
 ```bash
 cd ~/code/agent-toolkit && task install     # → ~/.local/bin

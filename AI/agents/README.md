@@ -6,6 +6,13 @@ own `.agents/`.
 
 ## Why vendored copies, not symlinks
 
+> **The full policy is the `authoring-agent-files` skill**
+> (`AI/skills/authoring-agent-files/SKILL.md`) — invoke it before adding or
+> changing any agent file here. Short version: symlinks are allowed **only** for
+> the `$HOME`-level globals that `task install` creates; everything inside a
+> shared repo is a **committed copy**, and no committed file may contain a
+> `~/code/dotconfig` path.
+
 The consuming repos are used by more than one developer. A committed symlink to
 `~/code/dotconfig/...` is **broken for anyone who does not have this private repo
 cloned**, so shared modules are copied into the consuming repo as real files and
@@ -28,6 +35,7 @@ The cost is drift. The rule:
 | `PLAN_TEMPLATE.md` | The required plan skeleton: TDD-first phase plus the mandatory closing phases | `serenity_api`, `serenity_ui` (`.agents/PLAN_TEMPLATE.md`) |
 | `agent-rules.md` | Cross-cutting agent behaviour (phases, no commits, verification, tickets, gates) | (canonical reference) |
 | `rust.md` | Language-level Rust conventions: prefer closed-set enums over raw strings, single-source-of-truth string mapping, parse at the boundary, error → HTTP mapping | `serenity_api` (folded into its repo-specific `.agents/RUST.md`) |
+| `code-review.md` | When to invoke a code review, the evidence/judgement boundary, and the reporting shape (severity labels, verdict) | `serenity_api`, `serenity_ui` (`.agents/CODE_REVIEW.md`) |
 
 Repo-specific rules (commands, Definition of Done, stack guidance) are **not**
 shared — they live in each repo's own `AGENTS.md` and `.agents/` files.

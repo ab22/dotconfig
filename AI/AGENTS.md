@@ -66,3 +66,7 @@ Skills are on-demand procedures; invoke the matching one before doing the work.
 They live in `~/.agents/skills` (symlink → `dotconfig/AI/skills`).
 
 - `test-driven-development` — any behaviour change, bug fix, or new logic.
+- `authoring-agent-files` — adding or updating an agent file here, or vendoring
+  one into a repo (symlink vs committed copy; no private paths in shared repos).
+- `code-review-and-quality` — reviewing any change (your own, another agent's, or
+  a human's) before hand-off or before opening the PR.

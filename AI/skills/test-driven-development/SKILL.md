@@ -10,8 +10,7 @@ whenToUse: Implementing or changing behaviour, fixing a bug, or adding edge-case
 > output. Do not implement until the user approves. The user makes all commits —
 > never run `git commit` or `git push` yourself.
 >
-> Vendored from https://github.com/addyosmani/agent-skills (MIT). Canonical
-> source is `~/code/dotconfig/AI/skills/test-driven-development/`.
+> Vendored from https://github.com/addyosmani/agent-skills (MIT).
 
 # Test-Driven Development
 
