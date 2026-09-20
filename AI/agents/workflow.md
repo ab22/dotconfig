@@ -61,6 +61,13 @@ A plan that changes no behaviour still ends with an explicit verification phase.
 - Keep the ticket's phase order; do not silently re-derive the design.
 - **The user makes all commits by default** — see `tdd.md` for the single
   exception: an explicit request to run the whole flow in one go.
+- **Prefix the commit subject with its kind:** `feat:`, `fix:`, `chore:`,
+  `test:`, `docs:`, and `sec:`. Use `sec:` when the change alters security
+  behaviour — a new control, a tightened one, or a vulnerability fix — so that
+  security work stays legible in `git log` instead of hiding inside `feat:`. It
+  describes the *change*, not the ticket: dependency bumps and lockfile churn are
+  still `chore:`. Nothing enforces this; it is a convention, and no tooling
+  rejects a subject that ignores it.
 
 ## 3. Review and PR
 
