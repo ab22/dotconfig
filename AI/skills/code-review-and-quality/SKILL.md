@@ -40,7 +40,7 @@ the workflow keeps its single review gate, and the user owns it.
 | T4 | A **bug fix** is complete | Always | review the fix *and* its regression test; a fix with no failing-first test is not done |
 | T5 | A **refactor** is complete | Always | did it reduce the concepts a reader must hold, or just relocate them? |
 | T6 | A **dependency** is added, removed, or upgraded | Always | changelog read, one package per change, lockfile diff reviewed, suite green before *and* after |
-| T7 | The change crosses a **trust boundary** — authorization, request parsing, SQL, secrets, uploads, external data | Always; **security axis first** | the security checklist |
+| T7 | The change crosses a **trust boundary** — authorization, request parsing, SQL, secrets, uploads, external data | Always; **security axis first** | the security checklist, and the Rust security reference where the stack is Rust |
 | T8 | A file grows past its healthy size, or a new conditional is bolted onto an unrelated flow | Always | a structural remedy, proposed as a *named move* |
 | T9 | Docs, comments, or formatting only — no behavioural or structural change | **Skip the axes** | the lifecycle's review gate still applies; the five axes add nothing |
 
@@ -96,7 +96,9 @@ Does the change fit the system's design?
 
 ### 4. Security
 
-For detailed security guidance, see `references/security-checklist.md`. Does the change introduce vulnerabilities?
+For detailed security guidance, see `references/security-checklist.md`. For the
+Rust/Axum/sqlx depth — SQL, tokens, uploads, panics, supply chain — see
+`references/security-rust.md`. Does the change introduce vulnerabilities?
 
 - Is user input validated and sanitized?
 - Are secrets kept out of code, logs, and version control?
@@ -382,6 +384,7 @@ For triaging `npm audit` findings and supply-chain risk (typosquatting, compromi
 ## See Also
 
 - For detailed security review guidance, see `references/security-checklist.md`
+- For the Rust / Axum / sqlx security depth, see `references/security-rust.md`
 - For performance review checks, see `references/performance-checklist.md`
 - For the Rust / Axum / sqlx adaptation of these axes, see `references/code-review-rust.md`
 - For the Angular / TypeScript adaptation, see `references/code-review-typescript.md`

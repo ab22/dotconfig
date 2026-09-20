@@ -36,6 +36,7 @@ The cost is drift. The rule:
 | `agent-rules.md` | Cross-cutting agent behaviour (phases, no commits, verification, tickets, gates) | (canonical reference) |
 | `rust.md` | Language-level Rust conventions: prefer closed-set enums over raw strings, single-source-of-truth string mapping, parse at the boundary, error → HTTP mapping | `serenity_api` (folded into its repo-specific `.agents/RUST.md`) |
 | `code-review.md` | When to invoke a code review, the evidence/judgement boundary, and the reporting shape (severity labels, verdict) | `serenity_api`, `serenity_ui` (`.agents/CODE_REVIEW.md`) |
+| `security.md` | When to invoke the security capability, the evidence/judgement boundary, and what it does not own | `serenity_api` (`.agents/SECURITY.md`) |
 
 Repo-specific rules (commands, Definition of Done, stack guidance) are **not**
 shared — they live in each repo's own `AGENTS.md` and `.agents/` files.
