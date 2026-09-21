@@ -72,6 +72,16 @@ consistent. Whatever the choice, the HTTP layer must map it explicitly:
   and cover each variant in a table-driven test of the error mapping.
 - Prefer `422` for a malformed value, `409` for a state conflict, `404` for a
   missing record.
+- Ensure errors are propagated properly, in other words, errors must be returned
+  and they should be processed either at a global catcher for logging/tracing
+  purposes or properly handled.
+- When creating a new error type you must ask:
+  - Should it be mapped to a specific status code or just return a plain 500?
+  - What status code should it return?
+  - Is the user message clear enough and doesn't expose sensitive information about
+    the system or themselves?
+  - Does the internal error message include enough information for debugging purposes?
+
 
 ## Case and whitespace policy
 
