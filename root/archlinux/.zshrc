@@ -52,7 +52,7 @@ export MANWIDTH=90
 # Autocompletion for go-task
 eval "$(task --completion zsh)"
 
-mount-bitlocker() {
+mount-hdd() {
     mountpoint -q /mnt/hdd && { echo "Already mounted"; return 0; }
 
     sudo bash -c '
@@ -76,7 +76,7 @@ mount-bitlocker() {
     '
 }
 
-umount-bitlocker() {
+umount-hdd() {
     sudo umount /mnt/hdd && \
     sudo umount /mnt/bitlocker && \
     sudo pkill -f "dislocker /dev/sda1" 2>/dev/null
