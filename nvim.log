@@ -1,0 +1,2 @@
+WRN 2026-09-24T14:54:23.958 ?.243      server_start:197: Failed to start server: read-only file system: /run/user/1000/nvim-nvchad.243.0
+WRN 2026-09-24T14:54:23.961 ?.244      server_start:197: Failed to start server: read-only file system: /run/user/1000/nvim.244.0

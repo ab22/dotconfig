@@ -24,6 +24,8 @@ export PATH="$PATH:$HOME/.local/bin"
 
 # Neovim
 export PATH=$PATH:/opt/nvim-linux64/bin
+# NvChad trial — isolated under NVIM_APPNAME so plain `nvim` keeps its config.
+alias nvchad='NVIM_APPNAME=nvim-nvchad nvim'
 
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]

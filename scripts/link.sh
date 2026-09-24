@@ -2,8 +2,9 @@
 #
 # Create the symlinks that make this machine use the dotconfig sources:
 #   1. every file under root/<platform>/ mirrored into $HOME
-#   2. the generated editor configs under zed/ (run `task gen` first)
-#   3. the global AI agent files (instructions + skills)
+#   2. the Neovim app configs (default `nvim` + the opt-in `nvim-nvchad` trial)
+#   3. the generated editor configs under zed/ (run `task gen` first)
+#   4. the global AI agent files (instructions + skills)
 #
 # Idempotent. It re-points existing symlinks but never clobbers a real file or
 # directory: anything that is not already a symlink is skipped with a warning so
@@ -55,7 +56,15 @@ while IFS= read -r -d '' src; do
 done < <(find "$root_dir" -type f -print0)
 
 # ---------------------------------------------------------------------------
-# 2. Generated editor configs — `task gen` owns these files.
+# 2. Neovim app configs — one directory per app name, so both coexist without
+#    sharing plugin/data state. Plain `nvim` keeps the original config; the
+#    NvChad trial runs under NVIM_APPNAME=nvim-nvchad (the `nvchad` alias).
+# ---------------------------------------------------------------------------
+link "$repo/nvim"        "$home/.config/nvim"
+link "$repo/nvim-nvchad" "$home/.config/nvim-nvchad"
+
+# ---------------------------------------------------------------------------
+# 3. Generated editor configs — `task gen` owns these files.
 # ---------------------------------------------------------------------------
 for f in settings.json keymap.json tasks.json; do
   if [ ! -e "$repo/zed/$f" ]; then
@@ -66,7 +75,7 @@ for f in settings.json keymap.json tasks.json; do
 done
 
 # ---------------------------------------------------------------------------
-# 3. Global AI agent files — one canonical source, each tool's expected path.
+# 4. Global AI agent files — one canonical source, each tool's expected path.
 # ---------------------------------------------------------------------------
 link "$repo/AI/AGENTS.md" "$home/AGENTS.md"          # generic AGENTS.md convention
 link "$repo/AI/AGENTS.md" "$home/.dsh/AGENTS.md"     # DeepSeek Harness (user-global)
@@ -74,7 +83,7 @@ link "$repo/AI/AGENTS.md" "$home/.claude/CLAUDE.md"  # Claude Code (user memory)
 link "$repo/AI/skills"    "$home/.agents/skills"     # DSH skill root (~/.agents/skills)
 
 # ---------------------------------------------------------------------------
-# 4. agent-toolkit — installed as regular user binaries into ~/.local/bin by the
+# 5. agent-toolkit — installed as regular user binaries into ~/.local/bin by the
 #    toolkit's own installer, which root/<os>/.zshrc puts on $PATH.
 # ---------------------------------------------------------------------------
 toolkit="$HOME/code/agent-toolkit"

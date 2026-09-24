@@ -1,0 +1,5 @@
+# Upstream source of the vendored NvChad starter. Read by scripts/update-nvchad.sh.
+url=https://github.com/NvChad/starter
+ref=main
+commit=e3572e1f5e1c297212c3deeb17b7863139ce663e
+vendored=2026-09-24
