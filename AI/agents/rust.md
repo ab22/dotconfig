@@ -88,3 +88,26 @@ consistent. Whatever the choice, the HTTP layer must map it explicitly:
 Decide it, document it on the parser, and test it. Case-insensitive, trimming
 parsing is safe **only** because the parsed result is always the canonical form —
 so leniency cannot let a non-canonical value reach storage.
+
+## Dependencies and the lockfile
+
+A `Cargo.lock` change with no `Cargo.toml` change is still a **dependency
+change**, and it is reviewed like code: the diff is read, not rubber-stamped.
+
+- **Never hand-edit `Cargo.lock`.** Use targeted `cargo update -p <crate>` so the
+  upgrade is attributable and reviewable; a blanket `cargo update` is a larger,
+  separate decision.
+- **A blanket update may simply fail.** When a yanked version is pinned
+  transitively, cargo refuses to re-resolve it. Say so; do not hand-edit around it.
+- **Triage advisories by range and reachability, never by title.** Read the
+  advisory's own `Patched`/`Unaffected` fields, then ask whether the affected code
+  is reachable in this build. An `Unaffected` range that covers the pin is a false
+  finding; a crate absent from `cargo tree -i <crate>` is not compiled at all.
+- **Every accepted advisory carries a reason and a review-by date**, kept in the
+  dependency gate's config rather than as a blanket ignore. Delete an entry when
+  its reason stops applying, and let an unused-ignore warning be the signal.
+- **A licence allow-list is policy, not a scan result.** Adding an entry is a
+  decision to ship under that licence.
+- **Keep the dependency scan in the extended gate, not the default one.** An
+  advisory is a triage input that needs a human decision, and the advisory
+  database is fetched over the network; neither belongs in a build gate.
