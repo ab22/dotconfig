@@ -26,7 +26,8 @@
     "collapse_untracked_diff": false,
     "status_style": "label_color",
     "dock": "left",
-    "button": true
+    "button": true,
+    "entry_primary_click_action": "file_diff"
   },
   "auto_signature_help": false,
   "icon_theme": "Catppuccin Mocha",
