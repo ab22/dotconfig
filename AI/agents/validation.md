@@ -1,7 +1,7 @@
 # Validation standards: empty string, `null`, `undefined`
 
-Machine-wide baseline for AI coding agents. Canonical source:
-`~/code/dotconfig/AI/agents/validation.md`. Referenced from `AI/AGENTS.md`.
+Shared baseline for AI coding agents, adopted by every repo in this workspace as
+`.agents/VALIDATION.md`.
 
 The rule below is language-agnostic; each repo's `AGENTS.md` / `.agents/` says how
 that repo implements it. Project rules take precedence.

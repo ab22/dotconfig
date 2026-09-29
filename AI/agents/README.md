@@ -31,8 +31,10 @@ The cost is drift. The rule:
 | `workflow.md` | End-to-end lifecycle **plan → implement → review → PR**, its gates, and the mandatory closing phases | `serenity_api`, `serenity_ui` (`.agents/WORKFLOW.md`) |
 | `tickets.md` | Plan/design docs → GitHub Issues; `gh-plan` lifecycle (`new`/`branch`/`pr`) | `serenity_api`, `serenity_ui` (`.agents/TICKETS.md`) |
 | `branching.md` | Feature-branch naming, `alpha` base + sync rules, how PRs link to issues | `serenity_api`, `serenity_ui` (`.agents/BRANCHING.md`) |
-| `tdd.md` | Test-Driven Development: failing test → hand to user → implement; the user owns all commits | `serenity_api`, `serenity_ui` (`.agents/TDD.md`) |
+| `tdd.md` | Test-Driven Development: failing test → hand to user → implement; invalid/empty input coverage, and asking when the spec is silent; the user owns all commits | `serenity_api`, `serenity_ui` (`.agents/TDD.md`) |
+| `validation.md` | The four boundaries (`""` vs `null` vs absent) and the required test cases for each | `serenity_api`, `serenity_ui` (`.agents/VALIDATION.md`) |
 | `PLAN_TEMPLATE.md` | The required plan skeleton: TDD-first phase plus the mandatory closing phases | `serenity_api`, `serenity_ui` (`.agents/PLAN_TEMPLATE.md`) |
+| `forms.md` | Framework-agnostic form, field and picker rules: persistent external labels, one placement per form, sizing a control to its data without capping its message, typeable date entry, keeping bounded option lists reachable, matching control heights | (canonical reference) |
 | `agent-rules.md` | Cross-cutting agent behaviour (phases, no commits, verification, tickets, gates) | (canonical reference) |
 | `rust.md` | Language-level Rust conventions: prefer closed-set enums over raw strings, single-source-of-truth string mapping, parse at the boundary, error → HTTP mapping | `serenity_api` (folded into its repo-specific `.agents/RUST.md`) |
 | `code-review.md` | When to invoke a code review, the evidence/judgement boundary, and the reporting shape (severity labels, verdict) | `serenity_api`, `serenity_ui` (`.agents/CODE_REVIEW.md`) |

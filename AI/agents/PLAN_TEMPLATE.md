@@ -26,7 +26,12 @@ them even when the user did not ask for them.
 
 ### Phase 1 — Tests first (TDD)
 
-- [ ] Write the failing unit tests for <behaviour>.
+- [ ] List the inputs <behaviour> touches, with the invalid, empty, whitespace-only,
+      wrong-type and out-of-range values each one can take. **Where the ticket or spec
+      does not define the outcome for one of those values, ask the ticket owner and record
+      the answer here** before writing the tests — never assert today's behaviour as the
+      contract (see `tdd.md`, "Cover the invalid and empty path").
+- [ ] Write the failing unit tests for <behaviour>, including those cases.
 - [ ] Run `<unit command>` and confirm they fail for the expected reason.
 - [ ] **Hand the failing tests to the user and wait for approval.**
 - [ ] Implement the smallest change that makes them pass.
@@ -41,7 +46,9 @@ them even when the user did not ask for them.
 
 ### Phase N-2 — More unit tests
 
-- [ ] Edge cases, boundaries, and regressions not covered by Phase 1.
+- [ ] Edge cases, boundaries, and regressions not covered by Phase 1 — including the
+      invalid, empty, whitespace-only, wrong-type and out-of-range values from Phase 1's
+      list that Phase 1 did not reach.
 - [ ] Run `<unit command>`.
 
 ### Phase N-1 — Integration tests

@@ -20,6 +20,30 @@ this workspace (they complement repo-specific guidance such as
 Tests-first is not a formality: production code must never be written for a
 behaviour that has no failing test.
 
+## Cover the invalid and empty path
+
+A test set that only proves the happy path does not prove the behaviour — it
+proves the example. Every change's tests include the values its inputs can
+actually take:
+
+- **empty and whitespace-only** — `""`, `"   "`, `"\t\n"`;
+- **absent vs `null`** — the key omitted, and the key explicitly `null`, wherever
+  the contract tells them apart (`.agents/VALIDATION.md` has the boundary rules and
+  the required cases per boundary);
+- **wrong type or shape** — a number where a string belongs, an unknown enum
+  value, a malformed date, a value longer than the column or the limit;
+- **boundaries** — the value exactly on each limit, and one step outside it.
+
+**If the ticket or spec does not say what should happen for those values, ask the
+person who owns the ticket — before writing the test.** Do not invent the
+contract, and do not quietly assert today's behaviour: "the API answers 500
+today, so 500 is the expectation" is how a bug becomes the specification. Record
+the answer in the ticket, so the decision is reviewable and the next reader does
+not re-litigate it.
+
+The red-state hand-off names which invalid, empty and boundary cases the tests
+cover, and which ones the ticket left undefined.
+
 ## Commits: the user owns them by default
 
 - **The user makes every commit by default.** Agents must not run `git commit`

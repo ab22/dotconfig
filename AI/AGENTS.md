@@ -59,6 +59,15 @@ Keep this file short — it is always in context.
 3. For anything touching empty strings, `null`/`None` or `undefined`, follow
    `~/code/dotconfig/AI/agents/validation.md` (the four boundaries, the required
    test cases).
+4. Tests include the invalid and empty path for every input they touch — empty,
+   whitespace-only, absent, `null`, wrong type, and each boundary. If the ticket or
+   spec does not define those outcomes, **ask the ticket owner before writing the
+   test**; never assert today's behaviour as the contract
+   (`~/code/dotconfig/AI/agents/tdd.md`).
+
+5. For any form, field or picker UI, follow
+   `~/code/dotconfig/AI/agents/forms.md` (label placement, sizing a control to
+   its data, date entry, bounded option lists, matching control heights).
 
 ## Skills
 

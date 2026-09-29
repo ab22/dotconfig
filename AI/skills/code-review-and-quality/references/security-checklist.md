@@ -65,6 +65,30 @@ Before reaching for controls, spend five minutes thinking like an attacker:
 - [ ] Server-side URL fetches allowlisted; private/reserved IPs blocked (prevent SSRF)
 - [ ] Destructive path operations (delete/move/overwrite): symlinks resolved, allowlisted root, minimum depth, ownership evidence read before the call
 
+### Input hardening in this workspace (Rust/Axum + Angular)
+
+The bullets above are the generic method. Here they have known, checkable answers, so
+"we validate input" is never the answer to S3 — name the scenario and the test.
+
+| Scenario | What to check | Where it holds today |
+| --- | --- | --- |
+| Body size | `RequestBodyLimitLayer(GLOBAL_BODY_LIMIT)` and `DefaultBodyLimit::max(JSON_BODY_LIMIT)` still installed, and the `413` still asserted | `serenity_api` `src/http/edge/mod.rs`, `src/http/server.rs`, `src/tests/body_limits.rs` |
+| Empty / whitespace-only / over-long field | The request struct derives `Validate`, trims before `length(min = 1)`, and bounds every string with an explicit `length(max = …)` | request structs; contract in `.agents/VALIDATION.md` |
+| Missing key vs explicit `null` vs empty | The three states stay three states on PATCH: absent = unchanged, `null` = clear, `""`/whitespace = **reject**, never coerce | `.agents/VALIDATION.md`, `.agents/RUST.md` |
+| Wrong JSON type | serde's rejection is mapped to **422/400, never 500**, with a test per resource that sends the wrong type | `src/http/errors/process.rs` (mapping + regression tests) |
+| Unknown / extra fields | Decided per struct — ignore it and say so, or reject with `deny_unknown_fields`; never "whatever serde does today" | needs a recorded decision |
+| File uploads | A client-asserted `content_type` / `byte_size` is not trusted: verify the stored object after the presigned PUT | upload finalize paths |
+| Injection | sqlx binds only; a hand-built query string is the finding (`format!("SELECT`, `query(&format!`) | grep the diff |
+| Error leakage | A client mistake answers 422/400/413 naming the field — never a 500 with internals | `process_error` |
+
+Two rules here:
+
+- **Ask before asserting.** If the ticket or spec does not say what should happen for an
+  invalid or empty value, ask the ticket owner and record the answer; never bake today's
+  behaviour into a test (`.agents/TDD.md`, "Cover the invalid and empty path").
+- **The test is the evidence.** A checklist line with no test that sends the bad value is
+  a claim, not a control.
+
 ### Destructive Path Operations
 
 Containment for a target named by data. Resolve first, then decide — and treat the
