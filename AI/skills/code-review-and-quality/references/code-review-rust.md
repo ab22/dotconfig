@@ -28,9 +28,9 @@ layer — and **wins over this file** where they differ.
   mapping. An unmapped variant silently becomes **`500`**.
 - The match must stay **exhaustive**, so a new variant is a *compile error* rather
   than a silent `500`. A non-exhaustive match is a regression.
-- Statuses: **`422`** for a malformed value (both `validator::ValidationErrors`
-  and a domain `ValidationError`), **`409`** for a state conflict, **`404`** for a
-  missing record.
+- Statuses: **`422`** for a malformed value (a domain `ValidationError` — the only
+  carrier once rules live on the domain inputs), **`409`** for a state conflict, **`404`**
+  for a missing record.
 - Every new variant also gets a case in the **table-driven mapping test**.
 - Precedent: a `ValidationError::InvalidUUID` variant once fell through to `500`.
   It was fixed by adding the arm *and* a regression test — both are required.

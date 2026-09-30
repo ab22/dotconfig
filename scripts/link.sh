@@ -81,6 +81,10 @@ link "$repo/AI/AGENTS.md" "$home/AGENTS.md"          # generic AGENTS.md convent
 link "$repo/AI/AGENTS.md" "$home/.dsh/AGENTS.md"     # DeepSeek Harness (user-global)
 link "$repo/AI/AGENTS.md" "$home/.claude/CLAUDE.md"  # Claude Code (user memory)
 link "$repo/AI/skills"    "$home/.agents/skills"     # DSH skill root (~/.agents/skills)
+# Machine-specific environment facts (see AI/host-context.md). Loaded by DSH via
+# the `instructionFileCandidates` list in the profile patch, not by convention —
+# so this link must exist wherever that candidate list is configured.
+link "$repo/AI/host-context.md" "$home/HOST.md"
 
 # ---------------------------------------------------------------------------
 # 5. agent-toolkit — installed as regular user binaries into ~/.local/bin by the

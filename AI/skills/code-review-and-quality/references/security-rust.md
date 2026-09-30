@@ -83,9 +83,12 @@ change — CI then verifies queries against stale SQL.
   defect. Argon2id is the current OWASP first choice, with bcrypt as the legacy
   option and a minimum work factor of 10.
 - **bcrypt truncates the password at 72 bytes, silently.** No error, no opt-out.
-  Two passwords sharing their first 72 bytes hash identically. A byte-length cap in
-  the validator is therefore a **security control**, not cosmetics — and it must
-  count *bytes*, not `chars().count()`.
+  Two passwords sharing their first 72 bytes hash identically. A byte-length cap
+  where the password is validated is therefore a **security control**, not
+  cosmetics — and it must count *bytes*, not `chars().count()`. A password is
+  deliberately **never trimmed or blank-checked**: a space is a legitimate
+  password character, so length and format rules are the only ones that belong on
+  it.
 - **`bcrypt::verify` already compares in constant time** internally. Do not
   hand-roll a comparison, and do not "optimise" by fetching the row first and
   comparing hashes with `==`.

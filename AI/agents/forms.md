@@ -21,6 +21,40 @@ carries a copy that can drift.**
   Mark the asterisk decorative and put `aria-required` on the control itself,
   which the control's own owner writes.
 
+## The read-only twin of a form
+
+A record is read far more often than it is edited, and the read-only screen is
+usually a different screen. These rules keep the two from drifting apart.
+
+- **A read-only field row reuses the form's own row anatomy, in the form's own
+  container** — same row element, same label column, same vertical rhythm. The
+  column must line up *by construction*, not by eye: the label column is what the
+  eye scans down, and data that jumps sideways when the user presses *Edit* costs
+  the reader their place. A read-only screen that grows its own percentage-based
+  columns is exactly the drift this rule prevents.
+- **…and it follows the form's row order,** for the same reason. A read-only
+  sub-heading that groups fields more readably than the form does is not worth
+  inverting the sequence: someone who has learnt where a field sits in the form
+  must find it in the same place.
+- **A read-only row is not a field.** There is no control to label and nothing to
+  validate, so it is a *different component*, not a `readonly` mode on the field
+  component. A mode switch would make most of that component's inputs conditional
+  (control id, required marker, error text, every error attribute) and would emit a
+  label pointing at nothing. Mode switches need a named reason.
+- **Project the value; do not add a plain-value input.** One string input cannot
+  carry a chip list, a translated enum label, a formatted date or a derived suffix,
+  so a component offering both would need a "which one wins" rule.
+- **An absent value keeps its row and its filler.** Deleting the row makes two
+  records structurally incomparable and makes the label column jump; showing the
+  label with an explicit "empty" tells the reader the field exists and was not
+  recorded, which is information. **A present-but-empty value is absent:** guard a
+  collection by its length, never by truthiness — an empty list is true, so a
+  truthiness check silently reports it differently from a missing one.
+- **Do not let a display shorthand invent a value.** A mapping that collapses
+  "not recorded" onto the first real answer (a bare truthiness ternary over a
+  clearable choice, say) states something the record does not say, which is worse
+  than an empty cell.
+
 ## Sizing
 
 - **Size the control to its data.** Long text fills the row; short data (counts,
