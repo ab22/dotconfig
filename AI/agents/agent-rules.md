@@ -52,10 +52,11 @@ most there; this module is the canonical, general version.
 
 | Repo | Stack | Local path | Default branch |
 | --- | --- | --- | --- |
-| serenity_api | Rust (Axum + sqlx/Postgres) | `/Users/abe/code/serenity_api` | `main` |
-| serenity_ui | Angular 17 + PrimeNG, Spanish-only | `/Users/abe/code/serenity_ui` | `main` |
+| serenity_api | Rust (Axum + sqlx/Postgres) | `/Users/abe/code/serenity_api` | `alpha` |
+| serenity_ui | Angular 17 + PrimeNG, Spanish-only | `/Users/abe/code/serenity_ui` | `alpha` |
 | dotconfig | shared dotfiles + `AI/` tooling + agent modules | `/Users/abe/code/dotconfig` | `main` |
 
 Release flow: **alpha (dev) → beta (staging) → main (production)**. Feature
 branches are cut from `alpha` and their PRs target `alpha`; releases promote up
-the chain (`alpha → beta → main`).
+the chain (`alpha → beta → main`). `alpha` is also each serenity repo's GitHub
+default branch (a stale local `origin/HEAD` may still say `main`).
