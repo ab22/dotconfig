@@ -37,24 +37,90 @@ mode — the check and the use drift apart.
 - Tests pin the invariants: every code round-trips through `as_str`/`FromStr`,
   the form is validated (e.g. 3 uppercase ASCII letters), and no duplicate
   entries exist in `ALL`.
+- The type itself carries **no serde and no `sqlx::Type`** — see "Keep the domain
+  format-free" below.
+
+## Keep the domain format-free
+
+A domain type describes an entity and its invariants. It does **not** know how it
+is spelled on the wire or in a column, so it derives **no** `Serialize`,
+`Deserialize`, `sqlx::Type` or `FromRow`.
+
+Each layer that references the domain owns its own representation and converts:
+
+- **HTTP**: `Deserialize` on a request DTO, then `From`/`TryFrom` into the domain;
+  `From<Domain>` into a response DTO on the way out.
+- **The database**: `FromRow` / `sqlx::Type` on a `Pg*` type, converted by `From`
+  in both directions.
+- Anything added later — gRPC, a CLI, a queue consumer — follows the same shape.
+
+The format is a *per-layer* decision. One domain enum can be a native Postgres
+`ENUM` in one column, a `TEXT` with a `CHECK` in another, and `snake_case` in JSON
+on the wire. A derive on the entity cannot express three decisions spread across
+two layers: it silently makes one layer's spelling authoritative and leaves the
+others to a second, competing table of strings.
+
+A hand-written `Deserialize` written only to decode a request body therefore
+belongs to the layer that reads the body — even when the *shape* it decodes (a
+three-state patch, say) is a domain concept. Keep the shape in the domain, the
+decoder in the transport.
+
+**Dependencies point inward.** The domain imports nothing from the layers around
+it — not their types, and not their error types. Only an outer layer knows a
+format, which is what makes the ban above hold in the first place.
+
+- **A repository failure is a domain error, not a driver one.** The persistence
+  vocabulary (`NotFound`, `Conflict`, …) is the domain's; the infrastructure
+  layer converts a driver error into it at the boundary. A repository trait
+  documents the domain variant, never the driver's.
+- **The conversion is total.** No pass-through arm: an unmapped driver error gets
+  the opaque catch-all variant rather than escaping as the driver's own type.
+  A repository may inspect a driver error to turn one specific constraint into one
+  specific domain error — that is the repository's job — but the result is still a
+  domain error.
+- **The domain classifies, the transport translates.** A use case may match
+  `NotFound`; mapping that to a status code belongs to the transport, the only
+  layer that knows what a `404` is. Downcasting an infrastructure error inside
+  the domain is the defect this rule prevents.
+- **Opaque payloads are the one exception, and they are exception-shaped.**
+  A free-form JSON blob the domain cannot type (say, integration metadata) may
+  stay as the serialization library's `Value`, because it asserts no format — no
+  spelling, no column shape, no variant names — which is what the ban targets.
+  Anything else, and any `Value` that is *read* rather than forwarded, is a
+  design smell. Where a genuine exception to a layer rule is unavoidable (a port
+  that must name the driver's connection type), name it in the rule, in one
+  place: an unnamed exception becomes a precedent.
+- **Names come from the business, not from a layer.** No
+  `Request`/`Response`/`Dto`/`Payload` in the domain, and no
+  `Pg`/`Row`/`Sql`/`Json`/`Column` either — those prefixes belong to the layer
+  that has the format. The repository verb is `create`, not `insert`.
+- **Prefer a gate to prose where the rule is mechanically checkable.** A test that
+  scans the domain's sources for forbidden tokens and derives keeps a *new* file
+  covered, and needs no allowlist to rot. Three properties are load-bearing, each
+  learned from a real miss: match **tokens, not paths** (a brace-nested
+  `use crate::{ db::X, … }` contains no `crate::db` literal); **strip comments
+  first**, or prose mentioning a banned name false-positives; and **assert the
+  walk found files**, because a gate that scans nothing passes vacuously.
 
 ## One table of strings, only
 
-Serialization must delegate to `as_str()`/`FromStr` through **hand-written**
-`Serialize`/`Deserialize` impls.
+`as_str()` is the single source of truth for the wire, database and display form.
+Every other layer **delegates** to it and keeps no second copy.
 
-- Do **not** put a name attribute (`#[serde(rename = "…")]`, `#[serde(rename_all = "…")]`,
-  `#[sqlx(rename_all = "…")]`) on each variant: every one is a second copy of the
-  code, free to drift from `as_str()`. Three parallel tables (`as_str` + serde +
-  sqlx) with no test tying them together is the classic defect.
+- The default delegation needs no serde at all: the layer holds a `String` and its
+  `From`/`TryFrom` hop calls `parse()` inbound and `as_str()` outbound. Nothing
+  can drift, because there is only one table.
+- Where a layer genuinely does derive serde on a type of its own — a `Pg*`
+  wrapper, a wire enum — a name attribute (`#[serde(rename = "…")]`,
+  `#[serde(rename_all = "…")]`, `#[sqlx(rename_all = "…")]`) on each variant is a
+  second copy of the code, and is allowed **only** alongside a test asserting the
+  derived form equals `as_str()` for every variant. Without that test,
+  hand-write the impls.
 - `rename_all` can only case-*transform* a variant name; it cannot express an
   arbitrary code (`HNL`, `application/pdf`). Neither `rename_all` nor `alias`
   provides **case-insensitive** matching — that needs a delegating `Deserialize`.
-- `Serialize` should call `serializer.serialize_str(self.as_str())`. A derived
-  form, or `#[serde(into = "String")]`, allocates a `String` per value.
-
-If a repo does keep name attributes, it must add a test asserting the serde form
-equals `as_str()` for every variant.
+- Hand-written `Serialize` should call `serializer.serialize_str(self.as_str())`.
+  A derived form, or `#[serde(into = "String")]`, allocates a `String` per value.
 
 ## Errors
 
