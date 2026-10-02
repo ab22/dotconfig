@@ -18,8 +18,8 @@ Stage-by-stage gates live in `workflow.md`; branch naming in `branching.md`.
 
 | Short | GitHub repo | Local clone |
 | --- | --- | --- |
-| `api` | `ab22/serenity_api` | `/Users/abe/code/serenity_api` |
-| `ui`  | `ab22/serenity_ui`  | `/Users/abe/code/serenity_ui` |
+| `api` | `ab22/serenity_api` | `$HOME/code/serenity/api` |
+| `ui`  | `ab22/serenity_ui`  | `$HOME/code/serenity/ui` |
 
 ## Lifecycle
 
@@ -144,8 +144,8 @@ checkout is required:
 ./scripts/gh-plan new docs/my-plan.md --repo api
 ```
 
-It resolves the local clones from `$HOME/code/serenity_api` and
-`$HOME/code/serenity_ui`; override with `SERENITY_API_LOCAL` /
+It resolves the local clones from `$HOME/code/serenity/api` and
+`$HOME/code/serenity/ui`; override with `SERENITY_API_LOCAL` /
 `SERENITY_UI_LOCAL` when your layout differs.
 
 The tool fails with a clear message if `gh` is missing or unauthenticated.
