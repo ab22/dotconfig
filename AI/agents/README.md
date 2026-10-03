@@ -31,6 +31,7 @@ The cost is drift. The rule:
 | `workflow.md` | End-to-end lifecycle **plan → implement → review → PR**, its gates, and the mandatory closing phases | `serenity_api`, `serenity_ui` (`.agents/WORKFLOW.md`) |
 | `tickets.md` | Plan/design docs → GitHub Issues; `gh-plan` lifecycle (`new`/`branch`/`pr`) | `serenity_api`, `serenity_ui` (`.agents/TICKETS.md`) |
 | `branching.md` | Feature-branch naming, `alpha` base + sync rules, how PRs link to issues | `serenity_api`, `serenity_ui` (`.agents/BRANCHING.md`) |
+| `worktrees.md` | Running several tickets side by side in a `git worktree`: directory naming, copying the env files in, moving the API/UI ports, the shared-database migration caution, and cleanup once the PR has merged | `serenity_api`, `serenity_ui` (folded into their repo-specific `.agents/WORKTREES.md`) |
 | `tdd.md` | Test-Driven Development: failing test → hand to user → implement; invalid/empty input coverage, and asking when the spec is silent; the user owns all commits | `serenity_api`, `serenity_ui` (`.agents/TDD.md`) |
 | `validation.md` | The four boundaries (`""` vs `null` vs absent) and the required test cases for each | `serenity_api`, `serenity_ui` (`.agents/VALIDATION.md`) |
 | `PLAN_TEMPLATE.md` | The required plan skeleton: TDD-first phase plus the mandatory closing phases | `serenity_api`, `serenity_ui` (`.agents/PLAN_TEMPLATE.md`) |
@@ -44,13 +45,15 @@ The cost is drift. The rule:
 Repo-specific rules (commands, Definition of Done, stack guidance) are **not**
 shared — they live in each repo's own `AGENTS.md` and `.agents/` files.
 
-> **Exception — `rust.md` is not vendored byte-identically.** Unlike the
-> lifecycle modules above, it carries *language-level* rules that a Rust repo
-> **folds into** its own repo-specific `.agents/RUST.md`, which also holds its
-> concrete wiring (its error enums, its HTTP mapping, its database layer).
-> Those two files are therefore deliberately **not** copies of each other: edit
-> the generic rule here, then port it into each repo's `RUST.md` by hand. Do not
-> run the `cp` + `diff` drift check on `rust.md`.
+> **Exception — `rust.md` and `worktrees.md` are not vendored byte-identically.**
+> Unlike the lifecycle modules above, they carry language- or project-level rules
+> that a repo **folds into** its own repo-specific file. `rust.md` becomes
+> `.agents/RUST.md`, which also holds its concrete wiring (its error enums, its
+> HTTP mapping, its database layer); `worktrees.md` becomes
+> `.agents/WORKTREES.md`, which names that project's ports, env files and paths.
+> Those files are therefore deliberately **not** copies of each other: edit the
+> generic rule here, then port it into each repo's file by hand. Do not run the
+> `cp` + `diff` drift check on them.
 
 ## How to vendor a module into a repo
 

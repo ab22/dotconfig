@@ -69,6 +69,14 @@ Keep this file short — it is always in context.
    `~/code/dotconfig/AI/agents/forms.md` (label placement, sizing a control to
    its data, date entry, bounded option lists, matching control heights).
 
+## Worktrees
+
+When a ticket has to run alongside others, do it in a `git worktree` — not a
+second clone. The procedure (directory naming, copying the env files in, moving
+the API/UI ports, the shared-database migration caution, and cleanup once the PR
+has merged) is `~/code/dotconfig/AI/agents/worktrees.md`, vendored per repo as
+`.agents/WORKTREES.md`.
+
 ## Skills
 
 Skills are on-demand procedures; invoke the matching one before doing the work.
