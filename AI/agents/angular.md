@@ -105,3 +105,48 @@ PrimeNG overlays that use OnPush can leave their mask (and a body overflow class
 behind when the leave animation's `done` fires outside the Angular zone. This has
 bitten both the confirm dialog and the image preview. Verify overlays close
 cleanly after every PrimeNG upgrade.
+
+## A dropdown is a picker, not a list view
+
+Never load a whole table (or collection) into a `p-dropdown`, `p-autoComplete` or
+`p-multiSelect`. Ask for **one page — around 20 rows — and fetch the rest as the
+user needs it**. Everything else scales with the data: the request count, the time
+the panel takes to open, and the memory the browser holds per open control.
+
+- **More than a page's worth → paginate or search on the server**, never preload:
+  one request when the panel opens (page 1, no filter), one page per
+  scroll-to-bottom, and stop asking once the rows fetched reach the response's
+  `total`. Once the user types, send the query to the server (debounced) instead of
+  filtering rows already in the browser.
+- **Append pages de-duplicated by id.** A record created between two page requests
+  shifts the offset, so the next page overlaps the last one.
+- **Render what the payload already carries.** A list that needs a display name
+  should get it from the endpoint that returns the rows (project the name onto
+  them) rather than loading a second collection to build an `id → label` map. A
+  `getAll()`-style "fetch every page" helper is a footgun: every caller of it is
+  this bug.
+- **The only exception is a genuinely bounded, static list** — an enum, or values
+  the frontend itself ships. Even then, if it *can* reach hundreds of rows,
+  paginate: "it is only N rows today" is how the N becomes thousands.
+- **If a control seems to need the full collection, raise it before implementing.**
+  A genuinely unpaginated picker is a design decision, not an implementation
+  detail — say what the control needs (search by name, recents, a stable ordering)
+  and let the ticket decide.
+
+## The virtual scroller inside `p-autoComplete` sizes itself
+
+Two findings from PrimeNG 17 that cost real debugging time; check both before
+trusting a lazy-loaded `p-autoComplete`:
+
+- **It needs its height pinned.** The component passes its `scrollHeight` down only
+  as a *style* and leaves the scroller's own `scrollHeight` input unset, so the
+  scroller's auto-size writes its measured content height back as its own height
+  and the panel — not the scroller — becomes the scroll container. The scroller
+  then never scrolls, `onLazyLoad` never fires for a real user, and a footer
+  template is pushed out of the panel. Pin the scroller's height in CSS next to the
+  control.
+- **Its reported viewport stops a few rows short of the end of the list**, so an
+  `onLazyLoad` handler that waits for "the last row" (`event.last === items.length`)
+  never fires at the bottom. Ask for the next page a few rows early — which also
+  keeps that end-of-list gap off screen.
+

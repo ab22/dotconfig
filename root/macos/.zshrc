@@ -56,3 +56,4 @@ export MANWIDTH=90
 # Load direnv automatically
 eval "$(direnv hook zsh)"
 eval "$(task --completion zsh)"
+export PATH=/opt/homebrew/opt/libpq/bin:$PATH
