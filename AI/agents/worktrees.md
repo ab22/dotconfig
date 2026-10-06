@@ -100,8 +100,13 @@ registered-but-missing checkout that `git worktree list` keeps reporting.
    `git -C ../api-<id> status` and decide whether the work is worth keeping.
    `--force` discards it; use it deliberately, never because the first attempt
    failed.
-5. **Delete the branch** (merged, so `-d` must succeed):
-   `git branch -d feat/api-<id>-<slug>` then `git worktree prune`.
+5. **Delete the local branch** (merged, so `-d` must succeed):
+   `git branch -d feat/api-<id>-<slug>` then `git worktree prune`. The **remote**
+   branch usually needs no step: with GitHub's *"Automatically delete head
+   branches"* setting on, merging the PR removes `origin/feat/api-<id>-<slug>`
+   itself. Turn that setting on where it is off — it cannot be forgotten, and it
+   is one click in the repo's settings. `-d` refusing is then a useful check that
+   the PR really landed, because it refuses until the commits are merged.
 6. **Drop the worktree's database** if you made one in step 5, together with its
    integration sibling. Leave the shared database alone — migrations another
    branch applied are still in use.
