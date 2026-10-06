@@ -150,3 +150,44 @@ trusting a lazy-loaded `p-autoComplete`:
   never fires at the bottom. Ask for the next page a few rows early — which also
   keeps that end-of-list gap off screen.
 
+## Button placement, action rows, and confirm-dialog copy
+
+Severity classes carry a button's *meaning*; where it sits carries the flow. Both need a written
+rule or every screen re-invents them — one app grew three different back-button positions, two
+action-row alignments, and a destructive confirm whose accept carried a checkmark.
+
+### Placement
+
+- **One back control per screen, in the page header next to the title**, and always with an
+  accessible name — never a bare icon. Do not also put a control in the action row that navigates to
+  the same destination: two controls for one destination is one too many.
+- **Action rows are right-aligned, with the primary action last in DOM order** so it lands rightmost
+  in a left-to-right locale; quiet/secondary controls come first. **Do not use `flex-row-reverse`**
+  to correct the rendering — it leaves the tab and screen-reader order backwards relative to every
+  other form.
+- **One submit icon per app.** Pick `pi pi-check` (commit this form) over `pi pi-save` (persist this
+  document) once, then apply it everywhere.
+- Write severity classes in a fixed order (`p-button-danger p-button-outlined`) so a search finds
+  every use.
+
+### Confirm-dialog copy
+
+- **The header is the question**, not a title; the **body is one short consequence line** — what will
+  happen, not a restatement of the question.
+- **Label the buttons with the verb, never "Yes"/"No".** The label has to make sense without the
+  question in view: users often read the buttons first, and a screen-reader user tabbing the button
+  list hears "Yes, No" with no context. Pass an explicit accept **and** reject label — a missing one
+  renders the library's bare default.
+- **Order: safe/dismissive on the left, the confirming action on the right.** That is
+  `p-confirmDialog`'s own order (it renders reject, then accept) and the macOS/web convention.
+  PrimeNG 17 exposes **no input to reorder** the buttons, so the opposite order would mean a custom
+  footer template on every dialog.
+- **A destructive accept carries a destructive icon** (`pi pi-trash`, or a warning icon where nothing
+  is actually removed) — **never a checkmark**, which reads as "this is good". Reserve the check for
+  constructive or neutral confirms.
+- **Keep labels and style classes in the `confirm({...})` config, not on the `<p-confirmDialog>`
+  template.** The component builds its options as `confirm({...}).X || <template input>.X`, so a
+  template attribute silently fills in for a key the config omits — the two files can disagree about
+  one dialog and only one of them wins. Confirm this in the installed build
+  (`node_modules/primeng/fesm2022/primeng-confirmdialog.mjs`).
+

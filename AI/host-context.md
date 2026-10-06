@@ -39,3 +39,63 @@ do. Bare `ssh git@github.com` still fails, since it reads the system config; `gh
 and the GitHub API over HTTPS were never affected.
 
 Verified 2026-09-29 with OpenSSH 10.5p1.
+
+---
+
+## Karma's Chrome cannot start under `workspace-write`, and there is no per-command fix (macOS)
+
+**Symptom.** In a `workspace-write` session, `npx ng test --watch=false` dies before
+running a test: `sandbox initialization failed: Operation not permitted`,
+`GPU process isn't usable. Goodbye.`, and `open ~/Library/Application
+Support/Google/Chrome/Crashpad/settings.dat: Operation not permitted`, ending in
+`ChromeHeadless failed 2 times (cannot start)`. Two traps hide it. Karma's **exit code
+is 0 when its output is piped**, so a run that executed nothing still looks like it
+passed — check for the `TOTAL: … SUCCESS` line. And the fix is an escalation request,
+so a denied approval reads as a silent no-op rather than an error.
+
+**Cause.** Chrome keeps its profile, crash dumps and GPU state under
+`~/Library/Application Support/Google/Chrome`, outside the session workspace, so the
+confined call needs escalation. DSH cannot pre-authorize that, and this is a documented
+limitation rather than a missing knob:
+
+- `@deepseek-ai/dsh-sandbox-policy`: *"One primary workspace root per session — policy
+  resolves `SessionHeader.cwd`; extra writable roots are not part of
+  `SandboxExecutionPolicy`."* Its config accepts only `mode` and `workspaceRoot`.
+- `@deepseek-ai/dsh-user-approval`: *"Only one-shot grants exist — … no `allow-always`,
+  remembered rule, revocation, or grant store; session policy is only `ask` /
+  `never`."*
+
+So do **not** hunt for a per-command allow-rule to add to
+`~/.dsh/profiles/<p>/cordis.patch.yml`, and do not set `policy: never` hoping to silence
+the prompt: `never` **rejects** escalations, so the tests would fail instead of run. The
+only lever is the session's permission preset, which sets the sandbox mode and the
+approval policy together.
+
+**Fix, in order of preference.**
+
+1. **Switch the session's preset:** `/permission danger-full-access`. It applies to that
+   session only (recorded in its log, survives its restart) and carries
+   `approval: never`, so nothing prompts. The shipped presets are `read-only`,
+   `workspace-write` and `danger-full-access`.
+2. **Launch with the mode set:**
+   `DSH_PERMISSION_MODE=danger-full-access dsh --profile <name>`. The base profile
+   already reads that variable for both `sandbox-policy.mode` and the approval policy, so
+   this needs no profile edit.
+3. **Approve the escalation per run** — what `serenity_ui/.agents/ANGULAR.md` ("Local
+   environment") documents. That is the point of `workspace-write`: the escalation is
+   asked rather than assumed.
+
+Options 1 and 2 are deliberately opt-in and session-scoped. Do not lower the *default*
+mode in a profile patch to make unit tests quiet: that drops file confinement for every
+session in every repo, which is a far larger change than this inconvenience justifies.
+
+**Do not put the workaround in the repo.** Chrome flags in `serenity_ui/karma.conf.js`
+would bake this machine's sandbox workaround into a shared file, which
+`serenity_ui/.agents/ANGULAR.md` ("Local environment — not project conventions")
+explicitly rules out. (The Linux box has a different failure — no browser found, fixed
+with `CHROME_BIN=/usr/bin/chromium` — and needs none of this.)
+
+Verified 2026-10-04 on Chrome 153 headless: `dsh --profile desktop --dump-config`
+(`sandbox-policy.mode`, `approval.policy`, `permission.presets`) plus the
+`npx ng test --watch=false` pair (blocked in `workspace-write`, then `TOTAL: 829 SUCCESS`
+under the wider sandbox).
