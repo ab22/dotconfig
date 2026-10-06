@@ -84,3 +84,7 @@ umount-hdd() {
     sudo pkill -f "dislocker /dev/sda1" 2>/dev/null
     echo "Unmounted"
 }
+
+# >>> railway initialize >>>
+source "$HOME/.railway/env"
+# <<< railway initialize <<<
