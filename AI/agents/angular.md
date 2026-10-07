@@ -191,3 +191,49 @@ action-row alignments, and a destructive confirm whose accept carried a checkmar
   one dialog and only one of them wins. Confirm this in the installed build
   (`node_modules/primeng/fesm2022/primeng-confirmdialog.mjs`).
 
+## A spec must not call `done()` and then throw
+
+Jasmine records the error, but the spec has already completed: Karma cannot attribute it, the
+browser stops reporting, and the run dies about 30 s later with
+`Disconnected, because no message in 30000 ms` — at a **different test count every run**, which
+reads like a flaky machine, a memory problem or a hanging test rather than what it is. Bisect by
+setting the suspect specs aside: the suite completes with them removed.
+
+The usual way to write it by accident is an `HttpTestingController` spec in the `done` style,
+where `expectOne` throws because the request under test was never made:
+
+```ts
+// No: `expectOne` throws, so the spec reaches `done.fail` and then throws anyway.
+service.getThing(id).subscribe({ next: (x) => { expect(x).toEqual(y); done(); } });
+httpMock.expectOne((c) => c.url.includes('/thing')).flush(y);
+```
+
+Drive the request, flush it, then assert — synchronously, with no `done`:
+
+```ts
+let received: Thing | undefined;
+service.getThing(id).subscribe((x) => (received = x));
+httpMock.expectOne((c) => c.url.includes('/thing')).flush(y);
+expect(received).toEqual(y);
+```
+
+One failure stays one failure, and the suite still prints its `TOTAL:` line. Reach for `done`
+only where the assertion genuinely cannot run synchronously — and never let a throw follow it.
+
+## `CHROME_BIN` is only for a browser the launcher cannot find
+
+`karma-chrome-launcher` resolves a normally-installed Chrome itself — on macOS,
+`/Applications/Google Chrome.app/Contents/MacOS/Google Chrome` — so **leave `CHROME_BIN` unset**
+there. Pointing it at a path that does not exist is worse than leaving it alone: the run dies
+before any spec starts, with
+
+```
+ERROR [launcher]: Cannot start ChromeHeadless
+	Can not find the binary /usr/bin/chromium
+```
+
+A test command that defaults the variable to a Linux path
+(`CHROME_BIN=${CHROME_BIN:-/usr/bin/chromium}`) therefore fails on a macOS box for a reason that
+reads like a broken suite. Set it only where Chrome really lives somewhere unusual, and point it
+at the **binary**, not at its directory.
+
