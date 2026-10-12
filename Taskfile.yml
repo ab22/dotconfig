@@ -1,10 +1,15 @@
 version: "3"
 
 # One entry point per concern — every task auto-detects the platform
-# (macos | archlinux) via scripts/detect-os.sh, so the same command works on
-# every machine. To target a platform explicitly, call the script directly:
+# (macos | archlinux | windows) via scripts/detect-os.sh, so the same command
+# works on every machine. To target a platform explicitly, call the script
+# directly:
 #   scripts/gen.sh macos
 #   scripts/link.sh archlinux
+#
+# The scripts are bash. On Windows they run under the bash that ships with Git
+# for Windows, so run `task` from a git-bash shell — `C:\Program Files\Git\cmd`
+# is on PATH but contains no bash.exe.
 
 tasks:
   default:
@@ -14,14 +19,20 @@ tasks:
       - task --list
 
   gen:
-    desc: Generate OS-specific config artifacts (auto-detects macos/archlinux)
+    desc: Generate OS-specific config artifacts (auto-detects macos/archlinux/windows)
     cmds:
-      - scripts/gen.sh
+      - cmd: scripts/gen.sh
+        platforms: [darwin, linux]
+      - cmd: bash scripts/gen.sh
+        platforms: [windows]
 
   link:
     desc: Symlink dotfiles, generated configs, and global AI agent files into $HOME
     cmds:
-      - scripts/link.sh
+      - cmd: scripts/link.sh
+        platforms: [darwin, linux]
+      - cmd: bash scripts/link.sh
+        platforms: [windows]
 
   install:
     desc: Full machine setup — generate artifacts, then create every symlink

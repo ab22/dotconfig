@@ -1,0 +1,27 @@
+{
+  "lsp": {
+    "rust-analyzer": {
+      "initialization_options": {
+        "check": {
+          "command": "clippy"
+        }
+      },
+      "binary": {
+        "path": "C:/Users/Abe/.cargo/bin/rust-analyzer.exe"
+      }
+    }
+  },
+  "agent": {
+    "tool_permissions": {
+      "default": "confirm"
+    }
+  },
+  "terminal": {
+    "shell": {
+      "with_arguments": {
+        "program": "C:\\Program Files\\Git\\bin\\bash.exe",
+        "args": ["--login", "-i"]
+      }
+    }
+  }
+}
