@@ -237,3 +237,38 @@ A test command that defaults the variable to a Linux path
 reads like a broken suite. Set it only where Chrome really lives somewhere unusual, and point it
 at the **binary**, not at its directory.
 
+## A required control the route fills is not user input
+
+A form is ready when **every** request that fills a control it will submit has settled — not when
+its primary load does. The two are easy to conflate, because the primary load is what makes the
+form appear at all:
+
+- `ngOnInit` fetches the entity, `finalize` clears `loading`, the template renders the form; and
+- a *second*, fire-and-forget subscription fills a required control from another endpoint.
+
+In between, the form is fully prefilled from the user's point of view — title, dates, everything
+they can see — and still `invalid`. The submit control is live, so pressing it runs the invalid
+branch and the user is told to complete fields that are visibly filled in. On a slow connection
+that window is the normal case, not a race; the bug is usually reported as "the form refuses to
+save sometimes".
+
+The rule:
+
+- **One owner for the ready state.** Every request that fills a control the form will submit belongs
+  to the same load (`switchMap`, `forkJoin`, `combineLatest`) behind a single `finalize`. A flag per
+  request drifts; a flag per page does not.
+- **"Still arriving" is not "missing".** A value the page is fetching is a loading state, not a
+  validation failure. Keep the form un-ready rather than letting the validator's message lie.
+- **Do not weaken the validator.** The control stays required: a flow that genuinely has no value
+  must still be refused. This removes a false positive, not the error path.
+- **Give a failed load a terminal state.** If the request never lands, "loading forever" is not an
+  answer and neither is a ready-looking form. Report the failure and leave a way out.
+- **Skipping a redundant fetch is part of it.** When two route inputs name the same resource (a
+  `?patientId=` beside the record it belongs to), fetch it once — the record is authoritative — so
+  the readiness gate cannot be doubled or drift between two copies.
+
+The test that proves it holds the second request open (a `Subject` nobody feeds) and asserts the form
+is **not offered** — no submit control at all, not merely `invalid` — then feeds it and asserts the
+form is ready and valid. A form that is "invalid while loading" passes a status assertion and still
+shows the user the wrong message.
+
