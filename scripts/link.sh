@@ -193,10 +193,36 @@ link "$repo/AI/AGENTS.md" "$home/AGENTS.md"          # generic AGENTS.md convent
 link "$repo/AI/AGENTS.md" "$home/.dsh/AGENTS.md"     # DeepSeek Harness (user-global)
 link "$repo/AI/AGENTS.md" "$home/.claude/CLAUDE.md"  # Claude Code (user memory)
 link "$repo/AI/skills"    "$home/.agents/skills"     # DSH skill root (~/.agents/skills)
-# Machine-specific environment facts (see AI/host-context.md). Loaded by DSH via
-# the `instructionFileCandidates` list in the profile patch, not by convention —
-# so this link must exist wherever that candidate list is configured.
+# Claude Code reads the same skills, but ONE LINK PER SKILL rather than the whole
+# directory. `~/.claude/skills` must stay a real directory: Claude Code's own
+# plugin and marketplace installers (and `npx impeccable install`) write skill
+# folders into it, and a directory link would make those land inside this repo.
+for skill_dir in "$repo"/AI/skills/*/; do
+  [ -d "$skill_dir" ] || continue
+  skill_name="$(basename "$skill_dir")"
+  case "$skill_name" in
+    .*) continue ;;   # a dot-directory is not a skill
+  esac
+  link "$skill_dir" "$home/.claude/skills/$skill_name"
+done
+# The rule files every AGENTS.md router points at: `~/.agents/rules/RUST.md`,
+# `~/.agents/rules/gates/TDD.md`, … A plain directory link, not a skill root —
+# DSH never scans it, and nothing in it is model-invocable.
+link "$repo/AI/rules"     "$home/.agents/rules"      # rule files (~/.agents/rules)
+# Machine-specific environment facts (see AI/host-context.md). Loaded by DSH
+# through the `~/AGENTS.md` pointer plus the `agent-instructions` entry in
+# `~/.dsh/profiles/<p>/cordis.patch.yml`; keep that entry's candidate list in
+# step with what AI/AGENTS.md documents.
 link "$repo/AI/host-context.md" "$home/HOST.md"
+
+# ---------------------------------------------------------------------------
+# 4b. Global git ignore — one file that applies to EVERY repo on this machine.
+#     It is what keeps `<repo>/.agents/local.md` (the per-repo agent overlay)
+#     out of shared repositories; see AI/rules/README.md. Git reads the path
+#     from core.excludesFile, so this link alone is not enough.
+# ---------------------------------------------------------------------------
+link "$repo/root/.gitignore" "$home/.gitignore"
+git config --global core.excludesFile "~/.gitignore"
 
 # ---------------------------------------------------------------------------
 # 5. agent-toolkit — installed as regular user binaries into ~/.local/bin by the

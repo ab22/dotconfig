@@ -72,7 +72,7 @@ The bullets above are the generic method. Here they have known, checkable answer
 
 | Scenario | What to check | Where it holds today |
 | --- | --- | --- |
-| Body size | `RequestBodyLimitLayer(GLOBAL_BODY_LIMIT)` and `DefaultBodyLimit::max(JSON_BODY_LIMIT)` still installed, and the `413` still asserted | `serenity_api` `src/http/edge/mod.rs`, `src/http/server.rs`, `src/tests/body_limits.rs` |
+| Body size | `RequestBodyLimitLayer(GLOBAL_BODY_LIMIT)` and `DefaultBodyLimit::max(JSON_BODY_LIMIT)` still installed, and the `413` still asserted | the repo's HTTP edge module, its server setup, and its body-limit test |
 | Empty / whitespace-only / over-long field | The request struct derives `Validate`, trims before `length(min = 1)`, and bounds every string with an explicit `length(max = …)` | request structs; contract in `.agents/VALIDATION.md` |
 | Missing key vs explicit `null` vs empty | The three states stay three states on PATCH: absent = unchanged, `null` = clear, `""`/whitespace = **reject**, never coerce | `.agents/VALIDATION.md`, `.agents/RUST.md` |
 | Wrong JSON type | serde's rejection is mapped to **422/400, never 500**, with a test per resource that sends the wrong type | `src/http/errors/process.rs` (mapping + regression tests) |

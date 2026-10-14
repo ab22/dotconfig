@@ -1,0 +1,27 @@
+# Global git ignore (canonical: dotconfig/root/.gitignore)
+#
+# Linked to ~/.gitignore and wired in by `task install` with:
+#   git config --global core.excludesFile ~/.gitignore
+#
+# It applies to EVERY repository on this machine — which is the point: the
+# per-repo agent overlay and other machine-local context files must never be
+# committed to a shared repo. `git check-ignore -v <path>` names the rule
+# responsible, in any repo.
+
+# --- machine-local agent context -------------------------------------------------
+# The per-repo overlay: switches and pack selection for this machine only.
+# See AI/AGENTS.md ("What loads, and in what order").
+.agents/local.md
+AGENTS.local.md
+CLAUDE.local.md
+
+# --- editors ---------------------------------------------------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# --- OS noise --------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini

@@ -8,6 +8,15 @@
 # Rust (rustup)
 export PATH="$PATH:$HOME/.cargo/bin"
 
+# npm's global bin, where go-task lives on this machine
+# (%APPDATA%\npm\task.cmd — npm's @go-task/cli, a shim that itself needs node).
+# Without this, `task` is missing inside git-bash and the completion hook below
+# silently does nothing — the Taskfile's own docs tell you to run it from here.
+# cygpath converts the Windows path; it ships with Git for Windows.
+if [ -d "$APPDATA/npm" ]; then
+  PATH="$(cygpath -u "$APPDATA/npm"):$PATH"
+fi
+
 # agent-toolkit binaries (gh-plan, plan, preflight, handoff, dod)
 export PATH="$PATH:$HOME/.local/bin"
 

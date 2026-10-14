@@ -13,8 +13,12 @@ whenToUse: Implementing or changing behaviour, fixing a bug, or adding edge-case
 > Cover the **invalid and empty path** for every input the tests touch — empty,
 > whitespace-only, absent, `null`, wrong type, and each boundary — and **if the ticket
 > or spec does not define those outcomes, ask the ticket owner before writing the test**.
-> Never assert today's behaviour as the contract. Full rule: `.agents/TDD.md`, "Cover the
-> invalid and empty path".
+> Never assert today's behaviour as the contract.
+>
+> **The authoritative rules are the packs, not this file:** the `gate-tdd` pack owns the
+> tests-first gate and the red-state hand-off, `gate-validation` owns the four
+> empty/`null`/absent boundaries, and `gate-plan-phases` owns where tests sit in a plan.
+> Where this vendored text and a pack disagree, **the pack wins.**
 >
 > Vendored from https://github.com/addyosmani/agent-skills (MIT).
 

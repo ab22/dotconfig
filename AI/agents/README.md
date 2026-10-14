@@ -1,79 +1,64 @@
-# AI/agents — shared agent instruction modules
+# AI/agents — retired modules
 
-Canonical, reusable instruction modules for AI coding agents. Each module is a
-self-contained Markdown file that a repo adopts by **vendoring a copy** into its
-own `.agents/`.
+> **Retired. Do not add to this directory.** These are the pre-router instruction
+> modules, kept as reference while repositories migrate. They are **not loaded** by
+> anything: no symlink points at them, and no router row reaches them.
+>
+> New rules are **rule files** under `AI/rules/`. Read
+> [`../rules/README.md`](../rules/README.md) — the canonical authoring manual — and
+> use the `authoring-agent-files` skill.
 
-## Why vendored copies, not symlinks
+## Why they were retired
 
-> **The full policy is the `authoring-agent-files` skill**
-> (`AI/skills/authoring-agent-files/SKILL.md`) — invoke it before adding or
-> changing any agent file here. Short version: symlinks are allowed **only** for
-> the `$HOME`-level globals that `task install` creates; everything inside a
-> shared repo is a **committed copy**, and no committed file may contain a
-> `~/code/dotconfig` path.
+They were vendored as byte-identical copies into consuming repos, which meant:
 
-The consuming repos are used by more than one developer. A committed symlink to
-`~/code/dotconfig/...` is **broken for anyone who does not have this private repo
-cloned**, so shared modules are copied into the consuming repo as real files and
-committed there — a plain `git clone` then works for everyone.
+- **Every rule was always-on in the repos that had them, and invisible in the repos
+  that did not.** `rust.md` carried general Rust *and* HTTP status-code mapping in
+  one 10.5 KB file; a repo that needed one got both.
+- **Shared files named private projects.** Files documented as repo-agnostic named
+  `serenity_api`, `serenity_ui`, `$HOME/code/serenity/...` and a specific `alpha`
+  branch — one developer's layout, in a module meant for a teammate to clone.
+- **Drift was the maintenance cost.** A copied file that differs from its canonical
+  version is a bug nobody sees until someone reads both.
 
-The cost is drift. The rule:
+The rule-file system removes all three: rules live in one place and are read on
+demand through a router, the switch block makes per-repo behaviour explicit, and
+nothing is copied into a repo.
 
-- **Edit the canonical module here, then re-vendor.**
-- **Never edit a vendored copy in place.** Each one carries a provenance header
-  saying so.
+## What replaced what
 
-## Layout & current modules
+| Retired module | Now |
+| --- | --- |
+| `tdd.md` | `rules/gates/TDD.md` (+ `rules/rust/TDD.md`, `rules/angular/TDD.md`) |
+| `workflow.md` | `rules/gates/PLAN_PHASES.md` (phases, closing phases) + `rules/gates/TICKETS.md` (gates, preconditions, PR) |
+| `tickets.md` | `rules/gates/TICKETS.md` (generic; the repo's own `AGENTS.md` carries its tool and paths) |
+| `branching.md` | `rules/gates/TICKETS.md` (branch naming, PR linking, release flow) |
+| `worktrees.md` | `rules/WORKTREES.md` |
+| `validation.md` | `rules/gates/VALIDATION.md` |
+| `forms.md` | `rules/gates/FORMS.md` |
+| `code-review.md` | `rules/gates/CODE_REVIEW.md` (+ `rules/rust/CODE_REVIEW.md`, `rules/angular/CODE_REVIEW.md`) |
+| `rust.md` | `rules/rust/RUST.md` → `API_HTTP.md`, `CLI.md`, `TDD.md`, `CODE_REVIEW.md` |
+| `angular.md` | `rules/angular/ANGULAR.md` → `PRIMENG.md`, `TDD.md`, `CODE_REVIEW.md` |
+| `agent-rules.md` | `AI/AGENTS.md` (the invariants that survive every switch) |
+| `security.md` | `rules/gates/SECURITY.md` |
+| `PLAN_TEMPLATE.md` | `rules/gates/PLAN_PHASES.md` (the skeleton is in that file) |
+| `README.md` | `../rules/README.md` |
 
-| Module | What it covers | Vendored into |
-| --- | --- | --- |
-| `workflow.md` | End-to-end lifecycle **plan → implement → review → PR**, its gates, and the mandatory closing phases | `serenity_api`, `serenity_ui` (`.agents/WORKFLOW.md`) |
-| `tickets.md` | Plan/design docs → GitHub Issues; `gh-plan` lifecycle (`new`/`branch`/`pr`) | `serenity_api`, `serenity_ui` (`.agents/TICKETS.md`) |
-| `branching.md` | Feature-branch naming, `alpha` base + sync rules, how PRs link to issues | `serenity_api`, `serenity_ui` (`.agents/BRANCHING.md`) |
-| `worktrees.md` | Running several tickets side by side in a `git worktree`: directory naming, copying the env files in, moving the API/UI ports, the shared-database migration caution, and cleanup once the PR has merged | `serenity_api`, `serenity_ui` (folded into their repo-specific `.agents/WORKTREES.md`) |
-| `tdd.md` | Test-Driven Development: failing test → hand to user → implement; invalid/empty input coverage, and asking when the spec is silent; the user owns all commits | `serenity_api`, `serenity_ui` (`.agents/TDD.md`) |
-| `validation.md` | The four boundaries (`""` vs `null` vs absent) and the required test cases for each | `serenity_api`, `serenity_ui` (`.agents/VALIDATION.md`) |
-| `PLAN_TEMPLATE.md` | The required plan skeleton: TDD-first phase plus the mandatory closing phases | `serenity_api`, `serenity_ui` (`.agents/PLAN_TEMPLATE.md`) |
-| `forms.md` | Framework-agnostic form, field and picker rules: persistent external labels, one placement per form, sizing a control to its data without capping its message, typeable date entry, keeping bounded option lists reachable, matching control heights | (canonical reference) |
-| `agent-rules.md` | Cross-cutting agent behaviour (phases, no commits, verification, tickets, gates) | (canonical reference) |
-| `rust.md` | Language-level Rust conventions: prefer closed-set enums over raw strings, single-source-of-truth string mapping, parse at the boundary, error → HTTP mapping | `serenity_api` (folded into its repo-specific `.agents/RUST.md`) |
-| `angular.md` | Language-level Angular/PrimeNG conventions: verify PrimeNG APIs against the installed build, custom controls that validate themselves, blur write-backs that swallow clicks, typeable date entry, the `p-floatLabel` sibling trap, dropdowns that page instead of loading their whole collection, the `p-autoComplete` virtual scroller's self-sizing, button placement and action-row order, and what a confirm dialog says (question header, verb labels, safe-left/confirm-right, destructive icons, the `confirm({...})` vs template resolution trap) | `serenity_ui` (folded into its repo-specific `.agents/ANGULAR.md`) |
-| `code-review.md` | When to invoke a code review, the evidence/judgement boundary, and the reporting shape (severity labels, verdict) | `serenity_api`, `serenity_ui` (`.agents/CODE_REVIEW.md`) |
-| `security.md` | When to invoke the security capability, the evidence/judgement boundary, and what it does not own | `serenity_api` (`.agents/SECURITY.md`) |
+## Migrating a repo
 
-Repo-specific rules (commands, Definition of Done, stack guidance) are **not**
-shared — they live in each repo's own `AGENTS.md` and `.agents/` files.
+A repo that vendored these keeps working — its committed `.agents/*` files are its
+own. Migrating means, per repo:
 
-> **Exception — `rust.md` and `worktrees.md` are not vendored byte-identically.**
-> Unlike the lifecycle modules above, they carry language- or project-level rules
-> that a repo **folds into** its own repo-specific file. `rust.md` becomes
-> `.agents/RUST.md`, which also holds its concrete wiring (its error enums, its
-> HTTP mapping, its database layer); `worktrees.md` becomes
-> `.agents/WORKTREES.md`, which names that project's ports, env files and paths.
-> Those files are therefore deliberately **not** copies of each other: edit the
-> generic rule here, then port it into each repo's file by hand. Do not run the
-> `cp` + `diff` drift check on them.
+1. Add the frontmatter switch block to its `AGENTS.md` (`workflow:` preset plus any
+   override) and a `rules:` list.
+2. Replace the vendored lifecycle modules with the repo's own routing table: which
+   rule file applies to which path, and what is deliberately **not** used there.
+3. Delete the vendored copies of what a shared rule file now owns; keep and extend
+   the ones that carry the repo's concrete wiring — its error types, its ports, its
+   commands, its Definition of Done.
+4. Add `.agents/local.md` (gitignored; `git check-ignore -v .agents/local.md`
+   proves it) for this machine's overrides.
 
-## How to vendor a module into a repo
-
-Keep the repo's own `AGENTS.md` as the entry point and copy the module in — no
-header and no attribution, so the copy is byte-identical to the canonical file:
-
-```bash
-cp ~/code/dotconfig/AI/agents/workflow.md <repo>/.agents/WORKFLOW.md
-diff <repo>/.agents/WORKFLOW.md ~/code/dotconfig/AI/agents/workflow.md   # drift check
-```
-
-Then list it in the repo's `AGENTS.md` "Documentation map" so agents know to read
-it before the relevant task.
-
-> The planned `agent-toolkit` repo will provide `agents sync` / `agents check` to
-> automate vendoring and detect drift; until then this is a manual copy.
-
-## Prerequisites
-
-These modules assume the GitHub CLI is installed and authenticated, and that a
-`gh-plan` binary is available — it ships in the `agent-toolkit` repo and is
-vendored into each consuming repo at `scripts/gh-plan`, so teammates need no
-extra checkout (see `tickets.md`).
+Repos migrate one at a time, deliberately. Until a repo migrates, its vendored
+copies are authoritative **for that repo** — do not edit them here expecting an
+effect there.
