@@ -10,8 +10,8 @@ rediscovering them. This is not a standard and not a rule set — it is a list o
 
 **Keep this file small.** It is always in context. Only what must be known *before*
 opening a file belongs here — the one-line form of each trap. The depth lives in
-the OS packs (`windows`, `macos`, `linux`); when an entry here grows past a few
-lines, move it there.
+the OS rule files (`~/.agents/rules/{windows,macos,linux}/`); when an entry here
+grows past a few lines, move it there.
 
 **Current host: Windows.** The macOS and Linux sections are kept because this
 config is used on those machines too; they cost a few lines each and save
@@ -28,14 +28,13 @@ one.
   `where` and `$env:Path` inside a session are not evidence about the host, and a
   spawn-based version check returns empty for every tool — so a repo's own audit can
   report working tools as missing. **Read the persisted `Path`** (Machine + User)
-  before believing a tool is absent. Full detail: the `windows` pack.
+  before believing a tool is absent. Full detail: `windows/WINDOWS.md`.
 - **`bash` is not on `PATH`.** `C:\Program Files\Git\cmd` is, and holds no
-  `bash.exe`; the binary is `C:\Program Files\Git\bin\bash.exe`. Run `task` from
-  git-bash (or cmd.exe) — under PowerShell, bare `task` resolves to `task.ps1` and
-  the execution policy blocks it.
-- **Symlinks need Developer Mode or elevation.** Without it, dotconfig's `link.sh`
-  falls back to junctions (directories) and hardlinks (files). Enable Developer
-  Mode so the next `task link` promotes them to real symlinks.
+  `bash.exe`; the binary is `C:\Program Files\Git\bin\bash.exe` (dotconfig's
+  Taskfile calls it by that path). Under PowerShell, bare `task` resolves to
+  `task.ps1` and the execution policy blocks it — call `task.cmd`.
+- **Developer Mode is on**, so `link.sh` makes real symlinks (verified 2026-10-14).
+  Without it, it falls back to junctions and hardlinks — see `windows/WINDOWS.md`.
 - **Useful commands live at** `%APPDATA%\npm\task.cmd` (go-task via npm),
   `%LOCALAPPDATA%\Author Software\nvm\.nodejs` (node), `%USERPROFILE%\.cargo\bin`
   (cargo), `C:\Program Files\GitHub CLI` (gh).
@@ -47,7 +46,7 @@ one.
   per-command allow-rule to grant it. **Its exit code is `0` when output is piped, so
   a run that executed nothing looks green** — check for the runner's own success
   line. The fix is a session permission preset, never a committed config change.
-  Full detail: the `macos` pack.
+  Full detail: `macos/MACOS.md`.
 - **The toolchain is BSD**, so GNU flags (`sed -i`, `date -d`, `readlink -f`) fail —
   often silently.
 - **Apple Silicon Homebrew is `/opt/homebrew`**, not `/usr/local`.
@@ -58,7 +57,7 @@ one.
   maps your user but not root, so root-owned files in `/etc/ssh/ssh_config.d/` render
   as `nobody` and OpenSSH's ownership check fails the connection. **Do not chown
   them** — the host is fine; that was a misdiagnosis that cost a session. Full
-  detail: the `linux` pack.
+  detail: `linux/LINUX.md`.
 - **A browser test needs `CHROME_BIN`** — no browser is found otherwise, and the
   failure can look like success under piped output.
 

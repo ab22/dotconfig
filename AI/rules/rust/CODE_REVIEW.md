@@ -1,5 +1,5 @@
 ---
-description: Reviewing Rust
+description: Reviewing Rust — the defects a language-agnostic review walks past (unwrap on fallible paths, ignored Result, lossy casts, release-mode overflow, undocumented unsafe), design smells (String for a closed set, format derives on the domain), async hazards, test and dependency red flags, and which gates are worth building. Use from rust/RUST.md when reviewing a Rust diff, with gates/CODE_REVIEW.md and the code-review-and-quality skill.
 ---
 
 > **Read this from `rust/RUST.md` when reviewing Rust.**
@@ -10,6 +10,11 @@ description: Reviewing Rust
 axes, the severity labels, the structural remedies, and its own per-language
 references. This file adds the Rust-specific defects that a language-agnostic
 review walks straight past.
+
+**Precedence:** the skill owns the *method*; the rule files own the *conventions*.
+Where the skill's `references/code-review-rust.md` and `rust/RUST.md` (or this
+file) disagree, the rule file wins — and the repo's own `.agents/RUST.md` wins
+over both.
 
 The general axes catch architecture. These catch the bugs.
 
@@ -93,7 +98,9 @@ The general axes catch architecture. These catch the bugs.
   supply-chain surface and a compile-time cost.
 - **Default features left on** for a crate where only one feature is needed.
 - **Version pinning inconsistent with the workspace** (`"1.2"` in one crate, `"1"`
-  in another).
+  in another) — the remedy is `[workspace.dependencies]`; see `rust/TOOLING.md`.
+- **A member `Cargo.toml` without `[lints] workspace = true`** — it silently
+  inherits none of the workspace lints.
 
 ## Gates worth building
 

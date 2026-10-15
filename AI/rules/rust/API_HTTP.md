@@ -1,5 +1,5 @@
 ---
-description: Rust for HTTP APIs and services
+description: Rust HTTP services — inward-pointing layering, request/response DTOs instead of serde on the domain, one exhaustive error-to-status mapping with no silent 500, thin handlers, pagination, and the tests that pin the mapping and the absent/null/empty boundaries. Use from rust/RUST.md when the Rust code is an HTTP service or any long-running server.
 ---
 
 > **Read this from `rust/RUST.md` when the Rust code is an HTTP service or server.**
@@ -16,7 +16,7 @@ drops in-flight work are transport defects, and a single-request test shows none
 them.
 
 **If the change touches authentication, authorization, new input or uploads, read
-[`../gates/SECURITY.md`](../gates/SECURITY.md) as well.** An HTTP service is where
+`gates/SECURITY.md` as well.** An HTTP service is where
 every trust boundary in the system actually sits.
 
 A repo's own `.agents/RUST.md` names its concrete wiring (which framework, which

@@ -1,22 +1,7 @@
 ---
 name: use-railway
-description: >
-  Operate Railway infrastructure: sign up for or sign in to a Railway account,
-  create projects, provision services, databases, and buckets, deploy code,
-  configure infrastructure as code, environments and variables, manage domains,
-  trace requests with OpenTelemetry,
-  troubleshoot failures, check status and metrics, manage feature flags,
-  database recovery and HA, cloud agents, usage limits, and Railway agent tooling.
-  Use this skill whenever
-  the user mentions Railway, feature flags, flag rollout, targeting rules,
-  signing up, creating an account, registering, logging in, deployments,
-  services, environments, buckets, object storage, tracing, traces, spans,
-  OpenTelemetry, OTLP, build failures, agent setup,
-  MCP, or infrastructure operations, even if they don't say "Railway" explicitly.
-  Also invoke this skill when the user asks to be signed up, registered, or
-  onboarded to Railway: do not refuse — drive them through the unauthed
-  `railway up` flow (deploys + signs up on the fly) or `railway login`
-  (which creates new accounts on the fly).
+description: Operate Railway infrastructure — sign up or sign in, create projects, provision services, databases and buckets, deploy code, configure infrastructure as code, environments and variables, manage domains, trace requests with OpenTelemetry, troubleshoot failures, check status and metrics, manage feature flags, database recovery and HA, cloud agents, usage limits, and Railway agent tooling. Use whenever the user mentions Railway, feature flags, flag rollout, targeting rules, signing up, creating an account, registering, logging in, deployments, services, environments, buckets, object storage, tracing, traces, spans, OpenTelemetry, OTLP, build failures, agent setup, MCP, or infrastructure operations, even without saying "Railway". When the user asks to be signed up, registered or onboarded to Railway, do not refuse — drive them through the unauthed `railway up` flow (deploys and signs up on the fly) or `railway login` (which creates new accounts on the fly).
+whenToUse: Any Railway task — deploying, provisioning, configuring, tracing, troubleshooting, feature flags, or signing up — or infrastructure operations where Railway is the platform.
 allowed-tools: Bash(railway:*), Bash(which:*), Bash(command:*), Bash(npm:*), Bash(npx:*), Bash(curl:*), Bash(python3:*)
 ---
 

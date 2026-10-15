@@ -33,27 +33,36 @@ a language's code-review rules: `~/.agents/rules/rust/RUST.md` →
 | `AGENTS.md` | The machine-global baseline — always-on. Symlinked to `~/AGENTS.md`, `~/.dsh/AGENTS.md`, `~/.claude/CLAUDE.md`. |
 | `rules/README.md` | **The canonical authoring manual.** |
 | `rules/` | The rule files. Symlinked to `~/.agents/rules`; read via the router. |
-| `skills/` | **Capabilities** the model invokes (not rules). `~/.agents/skills` links the whole tree; `~/.claude/skills/<name>` links one skill at a time. |
+| `skills/` | **First-party capabilities** the model invokes (not rules) — skills you wrote or changed. Linked one skill at a time into `~/.agents/skills/<name>` and `~/.claude/skills/<name>`. |
+| `third-party-skills.txt` | **Third-party skills**, by source — installed on every machine by `task skills`, never vendored. |
 | `host-context.md` | This machine's facts, OS-ordered, always-on. Symlinked to `~/HOST.md`. |
-| `agents/` | **Retired.** The old vendored modules, kept for reference while repos migrate. |
 
-**`~/.claude/skills` stays a real directory.** Claude Code's plugin and
-marketplace installers, and third-party installers such as `npx impeccable
-install`, create skill folders inside it — a directory symlink to `AI/skills`
+**Both skill roots stay real directories.** The `skills` CLI, Claude Code's
+plugin and marketplace installers, and installers such as `npx impeccable
+install` create skill folders inside them — a directory symlink to `AI/skills`
 would make every one of those writes land inside this public repo. `link.sh`
-therefore links one skill at a time and leaves the rest of the directory to the
-tools that own it.
+therefore links one skill at a time and leaves the rest of each directory to the
+tools that own it (it also turns an old whole-directory `~/.agents/skills` link
+back into a directory).
 
 ### Third-party skills
 
-Do not vendor these into `AI/skills/`. Each ships its own installer and its own
-copy per harness:
+A skill whose upstream owns the content is **listed, not copied**: one line in
+`third-party-skills.txt` (`<source> <skill>`). `task install` runs `task skills`,
+which installs each missing one with the `skills` CLI (`npx skills add -g`) into
+`~/.agents/skills` (DSH, Codex) and `~/.claude/skills` (Claude Code) — so every
+machine gets the same set, and `task skills:update` pulls the latest upstream.
+It needs Node.js; without it the rest of `task install` still completes.
 
-| Skill | DSH | Claude Code |
+| Skill | Source | Installed by |
 | --- | --- | --- |
-| `impeccable` | `bash ~/code/agent-toolkit/scripts/install-impeccable.sh` → `~/.dsh/skills/impeccable` | `/plugin marketplace add pbakaus/impeccable`, then install from `/plugin` |
+| `archify` | `tt-a1i/archify` | `task skills` |
+| `find-skills` | `vercel-labs/skills` | `task skills` |
+| `impeccable` | `pbakaus/impeccable` | DSH: `bash ~/code/agent-toolkit/scripts/install-impeccable.sh` → `~/.dsh/skills/impeccable`; Claude Code: `/plugin marketplace add pbakaus/impeccable` |
 
-`--check` reports the DSH copy's state without touching the network.
+**Changing a third-party skill makes it yours:** copy it into `AI/skills/`, take
+its line out of the list, and say at the top of its `SKILL.md` where it came from
+— as `code-review-and-quality` and `test-driven-development` do.
 
 ### The rule files
 
@@ -66,21 +75,23 @@ copy per harness:
 | `gates/PLAN_PHASES.md` | writing a phased plan document |
 | `gates/VALIDATION.md` | touching `""`, `null`, `None`, `undefined` or an absent value |
 | `gates/FORMS.md` | building or changing a form, field or picker |
-| `WORKTREES.md` | running several pieces of work side by side |
+| `gates/WORKTREES.md` | running several pieces of work side by side |
 | `rust/RUST.md` | writing, changing or reviewing Rust |
 | `rust/TOKIO.md` | async Rust — Tokio, blocking, channels, timeouts, shutdown |
 | `angular/ANGULAR.md` | writing, changing or reviewing Angular / PrimeNG |
-| `windows/WINDOWS.md` | a Windows-specific trap |
-| `macos/MACOS.md` | a macOS-specific trap |
-| `linux/LINUX.md` | a Linux-specific trap |
+| `windows/WINDOWS.md` | on Windows: a tool looks missing, a script is written, a command or build fails |
+| `macos/MACOS.md` | the same, on macOS |
+| `linux/LINUX.md` | the same, on Linux or WSL |
 
 Each language file routes further: `rust/` holds `API_HTTP.md`, `CLI.md`,
-`TOKIO.md`, `TDD.md` and `CODE_REVIEW.md`; `angular/` holds `PRIMENG.md`, `TDD.md`
+`TOKIO.md`, `TOOLING.md`, `TDD.md` and `CODE_REVIEW.md`; `angular/` holds `PRIMENG.md`, `TDD.md`
 and `CODE_REVIEW.md`.
 
 The per-repo switch block — `workflow: personal | work-light | work-gated` plus
 individual overrides and a `rules:` list — is documented in `AGENTS.md` and
-`rules/README.md`.
+`rules/README.md`. **To set one up for a new or existing repo, invoke the
+`project-setup` skill**: it detects the stack, asks for the preset and overrides,
+and writes the committed `AGENTS.md` with the wiring each enabled gate needs.
 
 ## Installing
 
@@ -90,9 +101,9 @@ cd ~/code/dotconfig && task install
 
 That links the global agent files, the rule files, the capabilities, the shell
 profiles (including `~/.local/bin` on `$PATH`), the editor configs and
-`~/.gitignore` — then runs the `agent-toolkit` installer when that repo is present.
-`link.sh` reports how many links it created, found already in place, and
-**skipped**; check the skip count.
+`~/.gitignore` — then runs the `agent-toolkit` installer when that repo is present,
+and finally `task skills` for the third-party skills. `link.sh` reports how many
+links it created, found already in place, skipped and pruned; check the skip count.
 
 ## Tools
 

@@ -1,5 +1,6 @@
-alacritty/alacritty.toml
 zed/settings.json
 zed/keymap.json
 zed/tasks.json
 
+# Neovim writes its log to the directory it was started from.
+nvim.log

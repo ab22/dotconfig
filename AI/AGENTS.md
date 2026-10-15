@@ -47,7 +47,7 @@ switches:
   review: on | off         # pre-hand-off review gate (see gates/CODE_REVIEW.md)
   validation: on | off     # the empty/null/absent boundary rules
   forms: on | off          # form, field and picker rules
-rules: [rust, angular]     # rule files this repo adds on top of the router's
+rules: [rust, windows]     # rule files read at session start, on top of the router
 ---
 ```
 
@@ -68,6 +68,11 @@ present, `.agents/local.md`, then state the active switches in one line, e.g.
 `workflow=personal · tdd=off tickets=off phases=off review=on · rules=rust`. A
 switch you did not read is a switch you cannot honour.
 
+**`rules:`** (committed and local lists merge) names paths under
+`~/.agents/rules/` without `.md`; a bare directory means its entry file —
+`rust` → `rust/RUST.md`, `rust/TOKIO`, `windows`. Read each before the first
+change. New repo, or changing its switches: invoke the `project-setup` skill.
+
 Never run a gate the switches turned off. Never skip one they left on. If a
 switch is wrong for the work in front of you, **say so and ask** — do not
 silently override it.
@@ -80,20 +85,20 @@ read and nothing else — no tool, no catalog, no invocation.
 
 | When you are about to… | Read |
 | --- | --- |
-| write, change or fix behaviour | `~/.agents/rules/gates/TDD.md` |
+| write, change or fix behaviour, with `tdd: on` | `~/.agents/rules/gates/TDD.md` |
 | review a change before hand-off or a PR | `~/.agents/rules/gates/CODE_REVIEW.md` |
-| file or pick up a ticket; branch for it | `~/.agents/rules/gates/TICKETS.md` |
-| write a phased plan document | `~/.agents/rules/gates/PLAN_PHASES.md` |
+| file or pick up a ticket, branch, open a PR — `tickets` or `branch-flow` on | `~/.agents/rules/gates/TICKETS.md` |
+| plan or phase work — `plan-doc`, `phases` or `closing-phases` on | `~/.agents/rules/gates/PLAN_PHASES.md` |
 | touch `""`, `null`, `None`, `undefined` or an absent value | `~/.agents/rules/gates/VALIDATION.md` |
 | build or change a form, field or picker | `~/.agents/rules/gates/FORMS.md` |
 | touch **auth, authorization, new input, uploads or secrets** | `~/.agents/rules/gates/SECURITY.md` — read with `gates/CODE_REVIEW.md`, security axis first |
-| run several pieces of work side by side | `~/.agents/rules/WORKTREES.md` |
-| write, change or review **Rust** | `~/.agents/rules/rust/RUST.md` |
+| run work side by side — `worktrees: on` | `~/.agents/rules/gates/WORKTREES.md` |
+| write, change or review **Rust**, `Cargo.toml` or its toolchain/CI | `~/.agents/rules/rust/RUST.md` |
 | work in **async Rust / Tokio** | `~/.agents/rules/rust/TOKIO.md` |
 | write, change or review **Angular / PrimeNG** | `~/.agents/rules/angular/ANGULAR.md` |
-| hit a Windows-specific trap | `~/.agents/rules/windows/WINDOWS.md` |
-| hit a macOS-specific trap | `~/.agents/rules/macos/MACOS.md` |
-| hit a Linux-specific trap | `~/.agents/rules/linux/LINUX.md` |
+| on **Windows**: call a tool missing, write a script, or debug a failed command | `~/.agents/rules/windows/WINDOWS.md` |
+| the same, on **macOS** | `~/.agents/rules/macos/MACOS.md` |
+| the same, on **Linux** (WSL included) | `~/.agents/rules/linux/LINUX.md` |
 
 **These files route further.** A language file chains to its task files — the Rust
 file points at `rust/API_HTTP.md`, `rust/CLI.md`, `rust/TDD.md` and
@@ -112,13 +117,8 @@ Three rules for following it:
   and exists on every machine that has run `task install`. If it is missing, say so
   and stop rather than guessing at the rules.
 
-**Nothing here is a skill.** A skill is a *capability the model invokes* (a
-diagram generator, a cloud CLI). These are rules it *reads*. Do not add a rule as
-a skill: a rule that needs an invocation is a rule that silently does not load.
-
-A repo may also declare specific rule files in `.agents/local.md` — see `rules:`
-in the switch block. An empty list means the router table above is the whole story
-for that repo, so read the repo's own `.agents/` before inventing any.
+An empty `rules:` means the router table is the whole story for that repo — but
+read the repo's own `.agents/` before inventing any rule.
 
 **A rule file is a floor, not a ceiling.** The repo's committed `.agents/` files
 and its concrete wiring win over a shared file where they are more specific.
@@ -157,10 +157,13 @@ Skip it when there was no friction. A suggestion that is always present is noise
 
 ## Skills
 
-Skills are **capabilities you invoke** — a diagram generator, a cloud CLI, a
-review method. They are not rules; the rules are the files above. They live in
-`~/.agents/skills` (symlink → `dotconfig/AI/skills`).
+Skills are **capabilities you invoke**; rules are files you *read*. Never add a
+rule as a skill — a rule that needs an invocation silently does not load. Yours
+are linked per skill from `dotconfig/AI/skills`; third-party ones come from
+`AI/third-party-skills.txt` via `task skills`. Both land in `~/.agents/skills`.
 
+- `project-setup` — set up or re-tune a repo's agent files: the switch block,
+  the `rules:` list, the wiring each enabled gate needs, `.agents/local.md`.
 - `authoring-agent-files` — adding or editing any agent file: a rule file, a repo
   `AGENTS.md`, `.agents/local.md`, or a skill.
 - `code-review-and-quality` — the review *method* the `gates/CODE_REVIEW.md` rule
@@ -171,10 +174,7 @@ review method. They are not rules; the rules are the files above. They live in
 ## This machine
 
 Facts about *this* workstation live in `~/HOST.md` (canonical:
-`AI/host-context.md`), OS-ordered and short. **Read it before concluding that a
-tool is missing or that a command cannot work.**
-
-The one-line version of the trap that has already cost a session: a confined shell
-does **not** inherit this machine's `PATH`, so `Get-Command` / `where` / `$env:Path`
-report installed tools as absent. Read `~/.agents/rules/windows/WINDOWS.md` before
-believing a tool is missing.
+`AI/host-context.md`), OS-ordered and short. It names the current OS, whose router
+row above is live all session. **Read it before concluding that a tool is missing
+or that a command cannot work** — a confined shell does not inherit the host's
+`PATH`, so installed tools look absent; never report one missing on that alone.

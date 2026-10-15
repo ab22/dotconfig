@@ -30,19 +30,23 @@ default; a handful of blocking calls removes the whole runtime's capacity.
 | `std::sync::Mutex` held across `.await` | `tokio::sync::Mutex`, or scope the guard so it drops first |
 | A `rayon` call that waits for its result | `spawn_blocking` the wait, or restructure |
 
-`spawn_blocking` is not a free pass: it has its own bounded pool (512 by default),
-and a task that blocks for minutes exhausts it just as surely. Bound the work, not
-just its placement.
+`spawn_blocking` is not a free pass: it has its own bounded pool (512 threads by
+default), and once a few long-blocking tasks fill it, every later call queues
+behind them. Bound the work, not just its placement.
 
-**Watch for `std::sync::Mutex` specifically.** It compiles across an `.await` in
-single-threaded tests and deadlocks in a real runtime, because the guard is not
-`Send` and the future is pinned to one thread. If it compiles, someone disabled the
-check.
+**Watch for `std::sync::Mutex` specifically.** Its guard is not `Send`, so holding
+it across an `.await` is a compile error inside `tokio::spawn` — but it compiles
+anywhere the future need not be `Send`: `#[tokio::main]`'s body, `block_on`, a
+`LocalSet`, a `current_thread` test. There it can deadlock: the task parks while
+holding the lock, and the next task on that thread to lock it blocks the thread the
+first one needs to resume. A clean compile is not evidence; `clippy::await_holding_lock`
+is.
 
 ## Spawn with a purpose
 
 - **`tokio::spawn` needs a reason.** A spawned task is detached: nobody awaits it,
-  so a panic in it disappears and a failure never propagates to the caller. Spawn
+  so a panic in it surfaces only through its `JoinHandle` (or a stderr line nobody
+  reads) and a failure never propagates to the caller. Spawn
   when the work is genuinely independent (a background poller, a connection writer)
   — not to "make it concurrent".
 - **Keep the `JoinHandle` when you need the outcome.** Dropping it discards the
@@ -80,9 +84,10 @@ check.
 | latest value only — the reader may miss intermediate ones | `watch` |
 | one-shot reply to a specific request | `oneshot` |
 
-- **A bounded channel is the default.** `channel(0)`/unbounded means memory grows
+- **A bounded channel is the default.** `unbounded_channel()` means memory grows
   with input and nothing applies backpressure — the failure shows up as an OOM
-  under load, never in a test.
+  under load, never in a test. (Tokio's `mpsc::channel(0)` is not a rendezvous
+  channel: it panics. Capacity is at least 1.)
 - **`broadcast` drops for a slow receiver and says so** (`RecvError::Lagged`).
   Handle that arm: silently skipping messages is how a watcher misses the one
   change that mattered.
@@ -124,8 +129,13 @@ can be dropped at any await point without losing data or duplicating a side effe
 
 - **`tokio::select!` on a shutdown signal in every long-running loop.** A loop that
   only exits on an error is a process that needs `kill -9`.
+- **Use `tokio_util`'s `CancellationToken` and `TaskTracker`** rather than a
+  hand-rolled flag and handle list: the token fans the signal out (child tokens per
+  subsystem), the tracker waits for every task to finish.
 - **`tokio::signal::ctrl_c()` for a CLI; a signal stream for a service**
-  (`SIGTERM` on unix, which is what an orchestrator sends). Handle both.
+  (`SIGTERM` on unix, which is what an orchestrator sends). Handle both — and
+  `tokio::signal::unix` does not compile on Windows, so gate it with
+  `#[cfg(unix)]` (Windows has `tokio::signal::windows::ctrl_close`/`ctrl_shutdown`).
 - **Drain in the right order:** stop accepting new work, let in-flight work finish
   with a bounded grace period, flush the sink, then exit. Exiting before the flush
   is how a "successful" deploy loses the last messages.

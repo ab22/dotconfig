@@ -15,10 +15,12 @@ whenToUse: Implementing or changing behaviour, fixing a bug, or adding edge-case
 > or spec does not define those outcomes, ask the ticket owner before writing the test**.
 > Never assert today's behaviour as the contract.
 >
-> **The authoritative rules are the packs, not this file:** the `gate-tdd` pack owns the
-> tests-first gate and the red-state hand-off, `gate-validation` owns the four
-> empty/`null`/absent boundaries, and `gate-plan-phases` owns where tests sit in a plan.
-> Where this vendored text and a pack disagree, **the pack wins.**
+> **The authoritative rules are the rule files, not this file:**
+> `~/.agents/rules/gates/TDD.md` owns the tests-first gate and the red-state
+> hand-off (and applies only under `tdd: on`), `gates/VALIDATION.md` owns the four
+> empty/`null`/absent boundaries, `gates/PLAN_PHASES.md` owns where tests sit in a
+> plan, and `<lang>/TDD.md` adds the language deltas. Where this vendored text and
+> a rule file disagree, **the rule file wins.**
 >
 > Vendored from https://github.com/addyosmani/agent-skills (MIT).
 

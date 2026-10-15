@@ -9,7 +9,7 @@
 # responsible, in any repo.
 
 # --- machine-local agent context -------------------------------------------------
-# The per-repo overlay: switches and pack selection for this machine only.
+# The per-repo overlay: switches and rule files for this machine only.
 # See AI/AGENTS.md ("What loads, and in what order").
 .agents/local.md
 AGENTS.local.md

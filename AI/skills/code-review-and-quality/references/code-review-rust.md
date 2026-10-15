@@ -3,22 +3,27 @@
 The Rust adaptation of the five review axes, consumed by the
 `code-review-and-quality` skill.
 
-This file is **repo-agnostic**: it names the defects a reviewer of *any*
-Rust/Axum/sqlx service must look for. Each repository's own `.agents/RUST.md`
-carries its concrete wiring — its error enums, its HTTP mapping, its database
-layer — and **wins over this file** where they differ.
+**Precedence.** The Rust conventions are the rule files —
+`~/.agents/rules/rust/RUST.md` and `rust/CODE_REVIEW.md` — and they win over this
+file where the two differ; the repository's own `.agents/RUST.md` wins over both.
+This file adds the Axum/sqlx review depth. Sections marked **(if the repo uses
+this seam)** describe one common architecture, not a universal rule: apply them
+only when the repo's `.agents/RUST.md` declares that shape, and never flag their
+absence as a defect.
 
 ## Correctness
 
 - **No `unwrap()`, `expect()` or `panic!` on a production path.** Return
-  `Result`; `thiserror` for library error enums, `anyhow::Result` to propagate
-  through services, repositories, use cases and handlers.
-- **Async trait methods** are written `fn m(…) -> impl Future<Output = Result<T>> + Send`,
-  **not `async fn`** — that is what gives the `Send` bound and what mockall can
-  expand. Capture owned values and return `async move { … }`. Purely synchronous
-  services stay plain `fn -> Result<T>`.
-- Every trait carries **`#[automock]`**; concrete implementations are injected
-  through `new(…)` constructors rather than constructed inside the type.
+  `Result` with a typed error (`thiserror` or hand-written). A repository returns
+  the **domain** error, never the driver's (`rust/RUST.md`, *Keep the domain
+  format-free*); `anyhow` is acceptable only where nothing downstream branches on
+  the variant, and it never reaches the response (see `security-rust.md`).
+- **A public async trait method used across tasks needs a `Send` future.** A bare
+  `async fn` in a trait does not promise one; write
+  `fn m(…) -> impl Future<Output = Result<T>> + Send` (capture owned values, return
+  `async move { … }`) where callers spawn it. Synchronous methods stay plain `fn`.
+- **(if the repo uses this seam)** Traits carry `#[automock]` and implementations
+  are injected through `new(…)` constructors.
 - **Never block in an async context** (`tokio::task::spawn_blocking` if you must),
   and never hold a lock across an `.await`.
 
@@ -35,7 +40,7 @@ layer — and **wins over this file** where they differ.
 - Precedent: a `ValidationError::InvalidUUID` variant once fell through to `500`.
   It was fixed by adding the arm *and* a regression test — both are required.
 
-## Transaction seams
+## Transaction seams (if the repo uses this seam)
 
 - **Repository** methods take `&mut U where U: UnitOfWork` — required and generic.
 - **Service** methods and use-case `execute` take an **optional** uow:
@@ -63,42 +68,17 @@ Two hops, each a standard conversion:
 - Value objects keep their own `TryFrom` returning the domain error.
 - **Mapping tests live beside the mapping**, not in the service.
 
-## Closed-set string enums
+## Closed-set string enums and boundaries
 
-A value that is a small fixed set of strings — a currency, a status, a kind — is
-an **enum, never a `String`**. Parse once at the boundary ("parse, don't
-validate"), so an unsupported value is unrepresentable downstream.
+Owned by the rule files — review against them, do not re-derive here:
+`rust/RUST.md` (*Shape of a closed-set string enum*, *One table of strings,
+only*) and `gates/VALIDATION.md` (absent vs `null` vs `""`). The sqlx-specific
+point they imply: a **derived `sqlx::Type` on a domain enum** is a third name
+mapping and turns an unknown stored value into a `ColumnDecode` error instead of
+the domain error — store the code as `TEXT`, `.parse()` on read, `as_str()` on
+bind.
 
-- The **variant set is the supported set** — no parallel allowlist that can drift.
-- `pub const ALL`, `pub const DEFAULT` + `impl Default` where a default exists.
-- `pub const fn as_str(self) -> &'static str` — the **single source of truth** for
-  the wire, database and display form.
-- `impl FromStr` — the real parser, so `.parse()` works.
-  `impl TryFrom<&str>` / `TryFrom<String>` delegate to it in one line.
-- `impl Display` writing `as_str()`; `Display` and `FromStr` must round-trip.
-- **One table of strings, only.** Hand-written `Serialize`/`Deserialize`
-  delegating to `as_str()`/`FromStr`. **No** per-variant `#[serde(rename)]` (a
-  second copy of every code), **no** `#[serde(rename_all)]` (it cannot express an
-  arbitrary code, and neither it nor `alias` gives case-insensitive input), and
-  **no derived `sqlx::Type`** — it is a *third* name mapping and makes an unknown
-  value surface as a `ColumnDecode` error instead of the domain error.
-- **Storage:** the code in a `TEXT` column, `.parse()` on read, `as_str()` on
-  bind.
-- Decide the case/whitespace policy and document it on the parser. Leniency is
-  safe *only* because the parsed result is always canonical.
-
-## Boundaries — absence, `null` and `""`
-
-- Absence, `None` and `""` are **three different states**. Never convert one into
-  another implicitly.
-- **Required means non-empty after trimming**: `""` and `"   "` are a client
-  error, never a silent default.
-- **Never** `unwrap_or_default()` on a required input.
-- Red flags: `unwrap_or_default()` on a required `String`; a `TEXT NOT NULL`
-  column where `''` is the de-facto "not set"; a mapper that turns a cleared
-  value into `""` on the wire.
-
-## Architecture
+## Architecture (if the repo uses this seam)
 
 - **Service vs. use case is decided by scope, not by collaborator count.**
   - *Service* — one primary model, several verb methods
@@ -140,8 +120,8 @@ validate"), so an unsupported value is unrepresentable downstream.
 ## Tests
 
 - Unit behaviour: colocated `#[cfg(test)] mod tests`.
-- Integration: the repo's `src/tests/` suite, marked serial where it shares a
-  database, using the repo's connection/transaction helpers.
+- Integration: the repo's integration suite, marked serial where it shares a
+  database, using the repo's own connection/transaction helpers.
 - Table-driven tests for error mapping and for every parser.
 - Every new error variant gets a mapping case.
 - A bug fix arrives with a **failing-first** regression test.
@@ -150,9 +130,11 @@ validate"), so an unsupported value is unrepresentable downstream.
 
 - An error type or variant with no mapping arm, or a non-exhaustive mapping match.
 - `unwrap()` / `expect()` / `panic!` on a production path.
-- A service method with no optional unit of work (it cannot join a transaction).
+- Where the repo uses a unit-of-work seam: a service method with no optional
+  unit of work (it cannot join a transaction).
 - A hand-rolled conversion that could be a `TryFrom`, or two tables of strings
-  that can drift (`as_str` plus a serde rename).
+  that can drift (`as_str` plus a serde rename with no test pinning them — see
+  `rust/RUST.md`).
 - `rename_all` used for an arbitrary code, or a case-insensitive requirement
   answered with `alias`.
 - A required input defaulted instead of rejected.

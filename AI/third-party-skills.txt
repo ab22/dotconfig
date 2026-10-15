@@ -1,0 +1,11 @@
+# Third-party skills — installed on every machine by `task skills` (part of
+# `task install`), never vendored into AI/skills/. scripts/skills.sh installs
+# each one with the `skills` CLI (npx skills add) into ~/.agents/skills (DSH,
+# Codex) and ~/.claude/skills (Claude Code). `task skills:update` updates them.
+#
+# A skill you wrote or changed belongs in AI/skills/ instead — this list is for
+# skills whose upstream owns the content.
+#
+# <source>            <skill>
+tt-a1i/archify        archify
+vercel-labs/skills    find-skills

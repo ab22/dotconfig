@@ -1,15 +1,37 @@
 version: "3"
 
 # One entry point per concern — every task auto-detects the platform
-# (macos | archlinux | windows) via scripts/detect-os.sh, so the same command
-# works on every machine. To target a platform explicitly, call the script
-# directly:
+# (macos | archlinux | linux | windows) via scripts/detect-os.sh, so the same
+# command works on every machine. To target a platform explicitly, call the
+# script directly:
 #   scripts/gen.sh macos
 #   scripts/link.sh archlinux
 #
 # The scripts are bash. On Windows they run under the bash that ships with Git
-# for Windows, so run `task` from a git-bash shell — `C:\Program Files\Git\cmd`
-# is on PATH but contains no bash.exe.
+# for Windows. BASH resolves it by absolute path first, because from cmd.exe or
+# PowerShell a bare `bash` is either missing (`C:\Program Files\Git\cmd` is on
+# PATH but holds no bash.exe) or, with WSL installed, System32\bash.exe — which
+# would run the scripts inside WSL and link the wrong $HOME. (`-f`, not `-x`:
+# go-task's built-in shell reports no .exe as executable on Windows.)
+
+vars:
+  BASH:
+    sh: |
+      if [ "{{OS}}" != windows ]; then
+        echo bash
+        exit 0
+      fi
+      for c in "C:/Program Files/Git/bin/bash.exe" \
+               "${LOCALAPPDATA:-}/Programs/Git/bin/bash.exe" \
+               "${USERPROFILE:-}/scoop/apps/git/current/bin/bash.exe"; do
+        if [ -f "$c" ]; then echo "$c"; exit 0; fi
+      done
+      if [ -n "${MSYSTEM:-}" ]; then
+        echo bash
+      else
+        echo "task: Git for Windows bash not found; install Git for Windows or run task from git-bash" >&2
+        exit 1
+      fi
 
 tasks:
   default:
@@ -19,23 +41,28 @@ tasks:
       - task --list
 
   gen:
-    desc: Generate OS-specific config artifacts (auto-detects macos/archlinux/windows)
+    desc: Generate OS-specific config artifacts (auto-detects macos/archlinux/linux/windows)
     cmds:
-      - cmd: scripts/gen.sh
-        platforms: [darwin, linux]
-      - cmd: bash scripts/gen.sh
-        platforms: [windows]
+      - '"{{.BASH}}" scripts/gen.sh'
 
   link:
     desc: Symlink dotfiles, generated configs, and global AI agent files into $HOME
     cmds:
-      - cmd: scripts/link.sh
-        platforms: [darwin, linux]
-      - cmd: bash scripts/link.sh
-        platforms: [windows]
+      - '"{{.BASH}}" scripts/link.sh'
+
+  skills:
+    desc: Install the third-party skills in AI/third-party-skills.txt that are missing (needs Node.js)
+    cmds:
+      - '"{{.BASH}}" scripts/skills.sh'
+
+  skills:update:
+    desc: Re-install every third-party skill from its source (reaches the network)
+    cmds:
+      - '"{{.BASH}}" scripts/skills.sh --update'
 
   install:
-    desc: Full machine setup — generate artifacts, then create every symlink
+    desc: Full machine setup — generate artifacts, create every symlink, install third-party skills (idempotent)
     cmds:
       - task: gen
       - task: link
+      - task: skills

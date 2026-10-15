@@ -1,0 +1,6 @@
+# LF everywhere, whatever core.autocrlf says. With autocrlf=true a Windows
+# checkout gets CRLF files: Git-for-Windows bash tolerates that, but the same
+# checkout run from WSL (/mnt/c/...) or copied to Linux/macOS fails on
+# `set -euo pipefail\r` and on `#!/usr/bin/env bash\r`. Every editor and
+# harness used here reads LF.
+* text=auto eol=lf

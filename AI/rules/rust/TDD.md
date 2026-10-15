@@ -6,7 +6,7 @@ description: Rust-specific testing rules — read with the general tests-first g
 
 # Rust and TDD
 
-**Read [`../gates/TDD.md`](../gates/TDD.md) first.** It owns the gate: write the
+**Read `gates/TDD.md` first.** It owns the gate: write the
 failing test, run it, confirm it fails *for the expected reason*, hand the red
 output to the user and wait. Nothing here replaces that, and where the two
 disagree the gate wins.
@@ -32,8 +32,9 @@ A test function may return `Result<(), E>` and use `?`. Prefer it:
 
 ```rust
 #[test]
-fn rejects_whitespace_only_code() -> Result<(), Box<dyn std::error::Error>> {
-    let err = parse("   ").unwrap_err();          // the assertion is the point
+fn rejects_blank_fixture_as_empty() -> Result<(), Box<dyn std::error::Error>> {
+    let input = std::fs::read_to_string("tests/fixtures/blank.txt")?; // setup: `?`, never unwrap
+    let err = parse(&input).unwrap_err();                            // the call under test
     assert!(matches!(err, ParseError::Empty { .. }));
     Ok(())
 }
@@ -68,7 +69,7 @@ fn rejects_invalid_currency_codes() {
 **Always put the input in the assertion message.** Without it, a table failure
 tells you only that *one* of six cases broke.
 
-The `../gates/VALIDATION.md` boundary set applies to every one of these tables:
+The `gates/VALIDATION.md` boundary set applies to every one of these tables:
 empty, whitespace-only, wrong length, wrong type/format, and one step past each
 limit.
 
@@ -97,7 +98,8 @@ stated invariant rather than an example: round-tripping, ordering, associativity
 Use the repo's own command — read its `AGENTS.md` rather than assuming. The
 defaults are `cargo test` for everything, `cargo test --lib` for unit tests only,
 `cargo test --test <name>` for one integration file, and `cargo test <substring>`
-to filter by name.
+to filter by name. **`cargo nextest run` skips doc tests** — pair it with
+`cargo test --doc`. The full verify gate is in `rust/TOOLING.md`.
 
 **Run the whole suite before calling a change done**, not just the new test: a
 closed-set enum change breaks other files' tests, and that is exactly what the

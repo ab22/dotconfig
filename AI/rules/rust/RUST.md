@@ -1,5 +1,5 @@
 ---
-description: Rust conventions — prefer closed-set enums over raw strings, one table of strings as the single source of truth, a format-free domain with dependencies pointing inward, real error types with no silent default arm, and the dependency/lockfile policy. Routes to the task files for an HTTP service, a CLI, testing, and review.
+description: Rust conventions — prefer closed-set enums over raw strings, one table of strings as the single source of truth, a format-free domain with dependencies pointing inward, real error types with no silent default arm, and the dependency/lockfile policy. Routes to the task files for an HTTP service, a CLI, async/Tokio, testing, review, tooling/verification, and Rust on Windows.
 ---
 
 > **Read this when working in Rust: writing, changing or reviewing any `.rs`, `Cargo.toml` or `Cargo.lock`.**
@@ -17,6 +17,8 @@ read it first, then follow the row that matches the work.
 | a library crate or shared code, neither of the above | nothing further from this table |
 | **being tested, or written test-first** | `rust/TDD.md` — where tests live, table-driven cases, the invariants worth a round-trip test |
 | **being reviewed** | `rust/CODE_REVIEW.md` — the Rust defects a language-agnostic review walks past |
+| **set up, built or verified** — manifests, toolchain, lints, CI, "what do I run?" | `rust/TOOLING.md` — the default verify gate, MSRV, workspace deps and lints, features, profiles |
+| **built or run on Windows** | `windows/WINDOWS.md` § *Rust on Windows* — locked executables, the MSVC linker, Defender |
 
 These are **task routers, not alternatives** to one another: an async service under
 review reads `rust/API_HTTP.md`, `rust/TOKIO.md` **and** `rust/CODE_REVIEW.md`.

@@ -29,10 +29,12 @@ follows the chain until the topic is covered:
 ```
 ~/.dsh/AGENTS.md              always-on. Router: "working in Rust → read …/rust/RUST.md"
   └─ ~/.agents/rules/rust/RUST.md         language floor. Router again:
-       ├─ …/rust/API_HTTP.md              "an HTTP service"       ┐ task files:
-       ├─ …/rust/CLI.md                   "a command-line tool"   │ each points
-       ├─ …/rust/TDD.md                   "written test-first"    │ back at the
-       └─ …/rust/CODE_REVIEW.md           "being reviewed"        ┘ general rule…
+       ├─ …/rust/API_HTTP.md              "an HTTP service"       ┐
+       ├─ …/rust/CLI.md                   "a command-line tool"   │ task files:
+       ├─ …/rust/TOKIO.md                 "async / Tokio"         │ each points
+       ├─ …/rust/TOOLING.md               "set up or verified"    │ back at the
+       ├─ …/rust/TDD.md                   "written test-first"    │ general rule…
+       └─ …/rust/CODE_REVIEW.md           "being reviewed"        ┘
             └─ ~/.agents/rules/gates/TDD.md          …the gate it refines
             └─ ~/.agents/rules/gates/CODE_REVIEW.md
 ```
@@ -123,7 +125,7 @@ the global baseline instructs every other harness to read it.
 ---
 switches:
   tdd: on            # this machine tests this repo even though the team does not
-rules: [rust, api-http]
+rules: [rust/API_HTTP, windows]
 ---
 
 # Local notes
@@ -162,10 +164,9 @@ is ever reached without its parent.
 
 | Path | Holds |
 | --- | --- |
-| `AI/rules/gates/` | cross-cutting behaviour: `TDD.md`, `CODE_REVIEW.md`, `TICKETS.md`, `PLAN_PHASES.md`, `VALIDATION.md`, `FORMS.md` |
+| `AI/rules/gates/` | cross-cutting behaviour — one file per switch (`TDD.md`, `CODE_REVIEW.md`, `TICKETS.md`, `PLAN_PHASES.md`, `WORKTREES.md`, `VALIDATION.md`, `FORMS.md`) plus `SECURITY.md`, the switchless review axis |
 | `AI/rules/<language>/` | the language floor (`RUST.md`, `ANGULAR.md`) plus that language's task files |
 | `AI/rules/<os>/` | OS traps (`WINDOWS.md`, `MACOS.md`, `LINUX.md`) |
-| `AI/rules/WORKTREES.md` | a whole-workflow procedure that belongs to no language |
 
 **Naming**: the file that owns a directory is uppercase and matches it
 (`rust/RUST.md`, `windows/WINDOWS.md`). Task and topic files are uppercase,
@@ -178,8 +179,10 @@ files, linked from the parent's router table.
 ### 5. A language file's task rows
 
 Task shape is a **row in the language file's router table**, pointing at a file in
-the same directory. `rust/RUST.md` routes to `API_HTTP.md`, `CLI.md`, `TDD.md` and
-`CODE_REVIEW.md`.
+the same directory. `rust/RUST.md` routes to `API_HTTP.md`, `CLI.md`, `TOKIO.md`,
+`TOOLING.md`, `TDD.md` and `CODE_REVIEW.md` — and, for an OS × language trap, to a
+section of the OS file (`windows/WINDOWS.md` § *Rust on Windows*) rather than a
+copy of it.
 
 The pattern that makes this work: **a task file names the general rule it refines,
 and the reader reads that too.** `rust/TDD.md` opens by pointing at `gates/TDD.md`
@@ -204,7 +207,8 @@ when it stops being true — a stale host fact is worse than a missing one.
 **Capabilities the model invokes**, not rules. A skill's catalogue entry is always
 in context, so every skill costs something in every session; a rule file does not.
 Keep this directory for things that genuinely need an invocation: a diagram
-generator, a cloud CLI, a review *method* that a rule points at.
+generator, a cloud CLI, a review *method* that a rule points at, or a procedure
+that writes files — `project-setup`, which writes a repo's switch block.
 
 ## The switch grammar
 
@@ -225,9 +229,32 @@ switches:
   review: on | off
   validation: on | off
   forms: on | off
-rules: [rust, angular]     # extra rule files on top of the router table
+rules: [rust, rust/TOKIO]  # read at session start, on top of the router table
 ---
 ```
+
+**`rules:` entries** are paths under `~/.agents/rules/` without `.md`; a bare
+directory names its entry file (`rust` → `rust/RUST.md`, `windows` →
+`windows/WINDOWS.md`). The committed and local lists merge. Every listed file is
+read before the first change, so list only what applies to most work in the repo;
+the router reaches the rest. **An OS never goes in the committed list** — it is a
+fact about a machine, so it belongs in `.agents/local.md` or nowhere (`~/HOST.md`
+already routes it).
+
+**What each switch loads:**
+
+| Switch | Rule file |
+| --- | --- |
+| `tdd` | `gates/TDD.md`, then `<lang>/TDD.md` |
+| `review` | `gates/CODE_REVIEW.md`, then `<lang>/CODE_REVIEW.md`; `gates/SECURITY.md` at a trust boundary |
+| `tickets`, `branch-flow` | `gates/TICKETS.md` |
+| `phases`, `plan-doc`, `closing-phases` | `gates/PLAN_PHASES.md` |
+| `worktrees` | `gates/WORKTREES.md` |
+| `validation` | `gates/VALIDATION.md` |
+| `forms` | `gates/FORMS.md` |
+
+The `project-setup` skill walks a repo through choosing these and writes the
+result; its catalogue lists the wiring each gate needs from the repo.
 
 | Preset | tdd | tickets | phases | plan-doc | closing-phases | branch-flow | worktrees | review |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -319,5 +346,5 @@ or in `~/HOST.md`.
 ## Related
 
 - `authoring-agent-files` skill — the entry point, and the delivery checklist.
+- `project-setup` skill — writes a repo's switch block, `rules:` list and gate wiring.
 - `AI/AGENTS.md` — the always-on baseline and the live router table.
-- `AI/agents/` — retired modules, kept for reference while repos migrate.

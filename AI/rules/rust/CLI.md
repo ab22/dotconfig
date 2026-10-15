@@ -1,5 +1,5 @@
 ---
-description: Rust for command-line tools
+description: Rust command-line tools — a derived argument parser converted into domain types before any work, exit codes as API (0/1/2), stdout for data and stderr for everything else, one top-level error printer, explicit config precedence, and tests that assert exit codes and both streams. Use from rust/RUST.md when the Rust code is a command-line tool.
 ---
 
 > **Read this from `rust/RUST.md` when the Rust code is a command-line tool.**
@@ -47,7 +47,7 @@ A script calling this tool branches on the exit code, so it is API:
 ## stdout is data, stderr is everything else
 
 - **stdout carries the result** — the thing being piped. Nothing else.
-- **stderr carries **progress, warnings, diagnostics and errors**. A progress
+- **stderr carries progress, warnings, diagnostics and errors.** A progress
   spinner on stdout corrupts the output of the command being piped.
 - **Respect the terminal.** Colour, spinners and progress bars only when stderr is
   a TTY; `NO_COLOR` disables colour. A redirected run should produce clean text.

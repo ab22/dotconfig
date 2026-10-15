@@ -6,7 +6,7 @@ description: Angular-specific testing rules — read with the general tests-firs
 
 # Angular and TDD
 
-**Read [`../gates/TDD.md`](../gates/TDD.md) first.** It owns the gate: write the
+**Read `gates/TDD.md` first.** It owns the gate: write the
 failing test, run it, confirm it fails *for the expected reason*, hand the red
 output to the user and wait. Nothing here replaces that, and where the two
 disagree the gate wins.
@@ -48,7 +48,7 @@ This file adds only what is specific to Angular.
 
 ## Boundary cases
 
-The [`../gates/VALIDATION.md`](../gates/VALIDATION.md) set applies to every input,
+The `gates/VALIDATION.md` set applies to every input,
 and in a form it has a UI consequence worth asserting separately:
 
 - untouched → the key is **omitted** from the request body;
@@ -61,8 +61,8 @@ the bug lives.
 
 ## The browser suite can lie
 
-Read [`../windows/WINDOWS.md`](../windows/WINDOWS.md) or
-[`../macos/MACOS.md`](../macos/MACOS.md) before trusting a browser-based run:
+Read `windows/WINDOWS.md` or
+`macos/MACOS.md` before trusting a browser-based run:
 
 - **Karma's exit code is `0` when its output is piped**, so a suite that never
   started looks like a pass. **Assert on the runner's own `TOTAL: … SUCCESS` line**,

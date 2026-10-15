@@ -2,7 +2,7 @@
 description: Linux traps for agent sessions — a confined shell may map only your user so root-owned files render as nobody and OpenSSH's ownership check on included configs fails git-over-ssh, browser-based test runners find no browser until CHROME_BIN is set, plus case-sensitive paths, inotify watch limits, and GNU-vs-BSD flags. Use when git-over-ssh fails on a Linux box, a browser test cannot find Chrome, or a file watcher stops firing.
 ---
 
-> **Read this on Linux when git-over-ssh fails, a browser test finds no browser, or a watcher stops firing.**
+> **Read this on Linux (WSL included) before writing a shell script, and when git-over-ssh fails, a browser test finds no browser, a watcher stops firing, or a native build fails.**
 
 # Linux traps
 
@@ -95,6 +95,15 @@ The inverse of the macOS table: `sed -i`, `date -d`, `grep -P`, `readlink -f`,
 `stat -c`, `xargs -r` and `find -printf` all work here and fail on macOS. A script
 meant for both should use neither dialect's extensions — see `macos/MACOS.md` for
 the side-by-side table.
+
+## Native builds (Rust, Node addons)
+
+- **`linker 'cc' not found`** — no C toolchain. `base-devel` (Arch),
+  `build-essential` (Debian/Ubuntu), `@development-tools` (Fedora).
+- **`openssl-sys` fails / "Could not find directory of OpenSSL"** — install
+  `pkg-config` and the OpenSSL headers (`libssl-dev`, `openssl-devel`), or switch
+  the crate to its `rustls` feature where it offers one. Do not set
+  `OPENSSL_DIR` by hand to paper over a missing package.
 
 ## Ports and permissions
 

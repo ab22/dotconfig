@@ -43,20 +43,20 @@ repo and have every agent file in it work.
 
 | Mechanism | Allowed for | Never for |
 | --- | --- | --- |
-| **Symlink**, created by dotconfig's `task install` | paths under `$HOME` that are yours alone: `~/AGENTS.md`, `~/.dsh/AGENTS.md`, `~/.claude/CLAUDE.md`, `~/.agents/rules` → `AI/rules`, `~/.agents/skills` → `AI/skills`, `~/.claude/skills/<name>` → `AI/skills/<name>` **(one link per skill)**, `~/HOST.md` → `AI/host-context.md`, `~/.gitignore` → `root/.gitignore`, the editor configs | **anything inside a shared repo**; **a tool's own skill root as a whole directory** (see below) |
+| **Symlink**, created by dotconfig's `task install` | paths under `$HOME` that are yours alone: `~/AGENTS.md`, `~/.dsh/AGENTS.md`, `~/.claude/CLAUDE.md`, `~/.agents/rules` → `AI/rules`, `~/.agents/skills/<name>` and `~/.claude/skills/<name>` → `AI/skills/<name>` **(one link per skill)**, `~/HOST.md` → `AI/host-context.md`, `~/.gitignore` → `root/.gitignore`, the editor configs | **anything inside a shared repo**; **a tool's own skill root as a whole directory** (see below) |
 | **Committed copy** | every agent file inside a shared repo: its `AGENTS.md` and its own `.agents/*` | — |
 | **Gitignored, local only** | `<repo>/.agents/local.md` — this machine's switches and extra rule files | anywhere a teammate needs it |
 
 ### Never symlink a harness's skill root as a whole directory
 
-`~/.claude/skills` is a **real directory** on purpose. Claude Code's plugin and
-marketplace installers — and third-party installers such as `npx impeccable
-install` — create skill folders *inside* it. A directory symlink to `AI/skills`
-means every one of those writes lands **inside this public repo**.
+`~/.agents/skills` and `~/.claude/skills` are **real directories** on purpose. The
+`skills` CLI (`task skills`), Claude Code's plugin and marketplace installers, and
+installers such as `npx impeccable install` create skill folders *inside* them. A
+directory symlink to `AI/skills` means every one of those writes lands **inside
+this public repo**.
 
-`link.sh` therefore links **one skill at a time** into `~/.claude/skills/<name>`,
-leaving room for the tools that own their own folders there. `~/.agents/skills`
-*is* a directory link, because nothing writes into it: DSH only reads it.
+`link.sh` therefore links **one skill at a time** into each root, leaving room for
+the tools that own their own folders there.
 
 The general rule: link a tree you own and only read from; link individual entries
 into a tree another tool writes to.
@@ -74,10 +74,10 @@ path**, and none may name a private project, path or port.
 | True in every session, every project, every OS | `AI/AGENTS.md` | symlink only |
 | True of one language, task shape, OS or gate | `AI/rules/**` | symlink `~/.agents/rules`; read via the router |
 | The router model, file kinds, conventions | `AI/rules/README.md` | canonical doc; linked, never copied |
-| A capability the model must invoke | `AI/skills/**` | symlink `~/.agents/skills` (whole tree) **and** `~/.claude/skills/<name>` (per skill) |
-| A capability a third party ships and updates | **nothing here** | install it with its own installer into the harness that owns it |
+| A capability the model must invoke, that you wrote or changed | `AI/skills/**` | symlink `~/.agents/skills/<name>` **and** `~/.claude/skills/<name>` (per skill) |
+| A capability a third party ships and updates | one line in `AI/third-party-skills.txt` | `task skills` installs it with the `skills` CLI; one with its own installer (impeccable) is documented in `AI/README.md` |
 | This machine's facts | `AI/host-context.md` | symlink `~/HOST.md`, always-on |
-| The repo's team workflow, commands, Definition of Done | the repo's committed `AGENTS.md` | lives there; never comes from dotconfig |
+| The repo's team workflow, commands, Definition of Done | the repo's committed `AGENTS.md` — written with the `project-setup` skill | lives there; never comes from dotconfig |
 | This machine's deviation for one repo | `<repo>/.agents/local.md` | gitignored; local only |
 | Personal-only — mentions dotconfig or this machine | anywhere in `AI/` | never vendored; say so at the top of the file |
 

@@ -23,29 +23,36 @@ checkout are in `.agents/local.md` (gitignored).
 | `AI/AGENTS.md` | the machine-global agent baseline (**the router**) — symlinked to `~/AGENTS.md`, `~/.dsh/AGENTS.md`, `~/.claude/CLAUDE.md` |
 | `AI/rules/README.md` | the **canonical** authoring manual — the router model, file kinds, switch grammar, where a rule belongs |
 | `AI/rules/` | the rule files, read on demand — symlinked to `~/.agents/rules` |
-| `AI/skills/` | **capabilities** the model invokes (not rules) — symlinked to `~/.agents/skills` |
+| `AI/skills/` | **first-party capabilities** the model invokes (not rules) — linked per skill into `~/.agents/skills` and `~/.claude/skills` |
+| `AI/third-party-skills.txt` | third-party skills by source — installed by `task skills`, never vendored |
 | `AI/host-context.md` | this machine's facts — symlinked to `~/HOST.md` |
-| `AI/agents/` | **retired** modules, kept for reference while repos migrate — not loaded |
 | `root/<os>/` | per-OS shell profiles and `$HOME` files, mirrored into `$HOME` |
 | `root/.gitignore` | the **global** git ignore — symlinked to `~/.gitignore` |
 | `scripts/` | `gen.sh`, `link.sh`, `detect-os.sh`, `update-nvchad.sh` |
-| `nvim/`, `nvim-nvchad/`, `zed/`, `alacritty/`, `ghostty/`, `kitty/`, `i3*/`, `rofi/`, `sway*`, `vscode/` | app configs, symlinked into place |
+| `nvim/`, `nvim-nvchad/`, `zed/`, `vscode/` | editor configs, linked on every platform |
+| `alacritty/`, `ghostty/`, `kitty/` | terminal configs, linked on macOS and Linux |
+| `i3*/`, `sway*/`, `rofi/` | the tiling desktop, linked on Arch only |
 
 ## Commands
 
-The scripts are bash. On Windows they run under the Git-for-Windows bash, so run
-`task` from a **git-bash** shell (`C:\Program Files\Git\cmd` is on `PATH` but
-holds no `bash.exe`; the binary is at `C:\Program Files\Git\bin\bash.exe`).
+The scripts are bash. On Windows the Taskfile runs them with Git-for-Windows bash
+by absolute path (`C:\Program Files\Git\bin\bash.exe` — `Git\cmd` is on `PATH`
+but holds no `bash.exe`, and a bare `bash` may be WSL's), so `task` works from
+git-bash, cmd.exe, or PowerShell as `task.cmd`.
 
 ```bash
-task gen        # generate OS-specific artifacts (auto-detects macos/archlinux/windows)
-task link       # symlink dotfiles, editor configs, global agent files, ~/.gitignore
-task install    # gen + link
+task gen        # generate OS-specific artifacts (auto-detects macos/archlinux/linux/windows)
+task link       # symlink dotfiles, app configs, global agent files, ~/.gitignore
+task skills     # install the third-party skills in AI/third-party-skills.txt (Node.js)
+task install    # gen + link + skills
 ```
 
-`link.sh` is idempotent, never clobbers a real file, and re-points stale links.
-It reports `linked` / `already linked` / `SKIP` counts — **check the count**, a
-silent `SKIP` means a real file is shadowing the repo's version.
+`link.sh` is idempotent, never clobbers a real file, re-points stale links, and
+prunes per-skill links (in `~/.agents/skills` and `~/.claude/skills`) whose skill
+left the repo. It reports
+`linked` / `already linked` / `skipped` / `pruned` counts — **check the count**: a
+`SKIP` means a real file is shadowing the repo's version. A second `task install`
+must report `0 linked`; anything else is an idempotency bug.
 
 ## Rules that have already cost time here
 
@@ -57,10 +64,10 @@ silent `SKIP` means a real file is shadowing the repo's version.
 - **A new global ignore rule goes in `root/.gitignore`**, never in a repo's own
   `.gitignore` and never in `~/.gitconfig`. `git check-ignore -v <path>` names the
   rule responsible.
-- **`AI/agents/` is retired.** Do not add to it. **A new rule is a rule file under
-  `AI/rules/`, named by a router row in `AI/AGENTS.md` or in its language file** —
-  read `AI/rules/README.md` and use the `authoring-agent-files` skill. A rule file
-  that nothing routes to does not load, so the router row is part of the change.
+- **A new rule is a rule file under `AI/rules/`, named by a router row in
+  `AI/AGENTS.md` or in its language file** — read `AI/rules/README.md` and use the
+  `authoring-agent-files` skill. A rule file that nothing routes to does not load,
+  so the router row is part of the change.
 - **A rule is not a skill.** `AI/skills/` holds capabilities the model invokes;
   every skill's catalogue entry costs tokens in every session. Rules are plain
   files, read on demand, and cost nothing until read. Do not put a rule in

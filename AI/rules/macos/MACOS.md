@@ -2,7 +2,7 @@
 description: macOS traps for agent sessions — a browser-based test runner (Karma/Chrome) cannot start under the workspace-write sandbox because Chrome keeps state outside the workspace, its exit code is 0 when output is piped so a suite that never ran looks green, and there is no per-command allow-rule to add. Also covers case-insensitive APFS, BSD vs GNU tool flags, Homebrew paths, and CRLF. Use when a test runner fails to start on macOS, a version check lies, or a BSD-vs-GNU flag error appears.
 ---
 
-> **Read this on macOS when a browser-based test will not start, a version check lies, or a tool flag fails.**
+> **Read this on macOS before writing a shell script, and when a browser-based test will not start, a version check lies, a tool flag fails, or a build cannot find its linker.**
 
 # macOS traps
 
@@ -86,6 +86,11 @@ Scripts written against GNU flags fail here, often silently:
 rely on either dialect's extensions. `brew install coreutils` gives `g`-prefixed
 GNU tools (`gsed`, `gdate`) when a script needs one.
 
+**`/bin/bash` is 3.2.** A `#!/usr/bin/env bash` script gets it unless Homebrew's
+bash is first on `PATH`, so bash-4+ features fail on a stock Mac: `mapfile` /
+`readarray`, associative arrays (`declare -A`), `${var,,}` / `${var^^}`, `|&`, and
+negative array indices. dotconfig's scripts stay within 3.2 for that reason.
+
 ## Paths and the filesystem
 
 - **APFS is case-insensitive by default but case-preserving.** `Foo.ts` and
@@ -107,7 +112,9 @@ GNU tools (`gsed`, `gdate`) when a script needs one.
   fails (externally-managed environment) or installs somewhere `python3` does not
   look. Use a venv or `pipx`.
 - **`xcrun`/`git` need the Command Line Tools.** If `git` is missing on a fresh
-  machine, `xcode-select --install` is the answer, not a Homebrew git.
+  machine, `xcode-select --install` is the answer, not a Homebrew git. The same
+  fix applies when `cargo build` fails with `linker 'cc' not found` or an
+  `xcrun: error: invalid active developer path` after a macOS upgrade.
 
 ## Verified
 
