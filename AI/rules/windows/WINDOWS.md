@@ -47,7 +47,7 @@ which work on the host.
 
 | Tool | Location | Note |
 | --- | --- | --- |
-| `task` (go-task) | `%APPDATA%\npm\task.cmd` | npm's `@go-task/cli`. A **shim that shells out to `node`** — so it needs `node` on `PATH` too, which the sandbox also strips |
+| `task` (go-task) | `%APPDATA%\npm\task.cmd` | npm's `@go-task/cli`. A **shim that shells out to `node`** — so it needs `node` on `PATH` too, which the sandbox also strips. The real binary, `%APPDATA%\npm\node_modules\@go-task\cli\bin\task.exe`, needs no `node` and works from every shell |
 | `node` | `%LOCALAPPDATA%\Author Software\nvm\.nodejs` | nvm-managed |
 | `cargo`, `rustc` | `%USERPROFILE%\.cargo\bin` | |
 | `git`, `gh` | `C:\Program Files\Git\cmd`, `C:\Program Files\GitHub CLI` | |
@@ -59,8 +59,14 @@ which work on the host.
 which it prefers over `task.cmd` — and the execution policy is `Undefined` at every
 scope (Restricted).
 
-**Fix.** Use cmd.exe or git-bash, call `task.cmd` explicitly, or set the policy.
+**Fix.** Call `task.cmd` explicitly from PowerShell or cmd.exe, or set the policy.
 This looks like a missing tool and is not.
+
+**Not under git-bash:** there the bare name resolves to npm's `task` sh-shim, which
+builds a bad path (`C:\Program Files\Git\Users\...\run-task.js`) and fails, and
+`task.cmd` goes through cmd.exe, so the `{a,b}` brace syntax doesn't expand. Put the
+real binary first instead:
+`export PATH="$APPDATA/npm/node_modules/@go-task/cli/bin:$PATH"`.
 
 ## A repo task exits 127, or "bash: executable file not found"
 
@@ -135,6 +141,15 @@ equality test fails on Windows only. The fix is a committed `.gitattributes`
 `Set-Content`.** It reads UTF-8 as cp1252 and writes it back, turning every em
 dash into three characters, and `-Encoding UTF8` adds a BOM. Use the edit tools;
 the byte-level recipe is in the `authoring-agent-files` skill.
+
+## Python crashes with `UnicodeEncodeError: 'charmap' codec`
+
+**Cause.** The console is cp1252, so `print` of any non-ASCII text (`→`, `—`, `…`)
+raises. Setting `PYTHONIOENCODING=utf-8` does nothing under `py -I`: isolated mode
+ignores every `PYTHON*` variable.
+
+**Fix.** In the script, before the first print: `sys.stdout.reconfigure(encoding="utf-8")`.
+Write files with an explicit `encoding="utf-8"` too; the default is the codepage.
 
 ## Rust on Windows
 
