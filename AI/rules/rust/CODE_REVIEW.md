@@ -1,5 +1,5 @@
 ---
-description: Reviewing Rust — the defects a language-agnostic review walks past (unwrap on fallible paths, ignored Result, lossy casts, release-mode overflow, undocumented unsafe), design smells (String for a closed set, format derives on the domain), async hazards, test and dependency red flags, and which gates are worth building. Use from rust/RUST.md when reviewing a Rust diff, with gates/CODE_REVIEW.md and the code-review-and-quality skill.
+description: Reviewing Rust — the defects a language-agnostic review walks past (unwrap on fallible paths, ignored Result, lossy casts, release-mode overflow, undocumented unsafe), design smells (String for a closed set, format derives on the domain), async hazards, test and dependency red flags, `cfg` code gated to another OS (lint and test it in a container of that OS), and which gates are worth building. Use from rust/RUST.md when reviewing a Rust diff, with gates/CODE_REVIEW.md and the code-review-and-quality skill.
 ---
 
 > **Read this from `rust/RUST.md` when reviewing Rust.**
@@ -89,6 +89,20 @@ The general axes catch architecture. These catch the bugs.
 - **A test that cannot fail** — asserting a value it just constructed, or an
   `assert!(true)`. Check that the test would go red if the implementation were
   reverted.
+
+## Code gated to another OS
+
+- **`cfg`-gated code for an OS other than the host's is never compiled there.**
+  Clippy and the tests on Windows skip every `#[cfg(unix)]` item, and on Linux or
+  macOS they skip every `#[cfg(windows)]` one. An unused import or a broken test in
+  that code stays invisible until CI or a teammate on the other OS hits it.
+- **When the diff adds or changes such code, lint and test it in a container of
+  that OS before hand-off**, with the checkout mounted and the repo's own lint and
+  test commands — a Linux Rust image from a Windows host, a Windows image from a
+  Linux or macOS host.
+- **Windows containers need a Windows host.** Where none is available, run
+  `cargo clippy --target x86_64-pc-windows-gnu` (after `rustup target add`) at the
+  least, and say in the hand-off that the Windows tests did not run.
 
 ## Dependencies
 
