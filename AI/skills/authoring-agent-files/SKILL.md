@@ -43,7 +43,7 @@ repo and have every agent file in it work.
 
 | Mechanism | Allowed for | Never for |
 | --- | --- | --- |
-| **Symlink**, created by dotconfig's `task install` | paths under `$HOME` that are yours alone: `~/AGENTS.md`, `~/.dsh/AGENTS.md`, `~/.claude/CLAUDE.md`, `~/.agents/rules` → `AI/rules`, `~/.agents/skills/<name>` and `~/.claude/skills/<name>` → `AI/skills/<name>` **(one link per skill)**, `~/HOST.md` → `AI/host-context.md`, `~/.gitignore` → `root/.gitignore`, the editor configs | **anything inside a shared repo**; **a tool's own skill root as a whole directory** (see below) |
+| **Symlink**, created by dotconfig's `task install` | paths under `$HOME` that are yours alone: `~/AGENTS.md`, `~/.dsh/AGENTS.md`, `~/.claude/CLAUDE.md`, `~/.agents/rules` → `AI/rules`, `~/.agents/skills/<name>` and `~/.claude/skills/<name>` → `AI/skills/<name>` **(one link per skill)**, `~/HOST.md` → `AI/host-context.md`, `~/.agents/hosts` → `AI/hosts`, `~/.gitignore` → `root/.gitignore`, the editor configs | **anything inside a shared repo**; **a tool's own skill root as a whole directory** (see below) |
 | **Committed copy** | every agent file inside a shared repo: its `AGENTS.md` and its own `.agents/*` | — |
 | **Gitignored, local only** | `<repo>/.agents/local.md` — this machine's switches and extra rule files | anywhere a teammate needs it |
 
@@ -76,7 +76,7 @@ path**, and none may name a private project, path or port.
 | The router model, file kinds, conventions | `AI/rules/README.md` | canonical doc; linked, never copied |
 | A capability the model must invoke, that you wrote or changed | `AI/skills/**` | symlink `~/.agents/skills/<name>` **and** `~/.claude/skills/<name>` (per skill) |
 | A capability a third party ships and updates | one line in `AI/third-party-skills.txt` | `task skills` installs it with the `skills` CLI; one with its own installer (impeccable) is documented in `AI/README.md` |
-| This machine's facts | `AI/host-context.md` | symlink `~/HOST.md`, always-on |
+| This machine's facts | `AI/hosts/<os>.md`, routed from `AI/host-context.md` | symlink `~/.agents/hosts`; `~/HOST.md` is the always-on router |
 | The repo's team workflow, commands, Definition of Done | the repo's committed `AGENTS.md` — written with the `project-setup` skill | lives there; never comes from dotconfig |
 | This machine's deviation for one repo | `<repo>/.agents/local.md` | gitignored; local only |
 | Personal-only — mentions dotconfig or this machine | anywhere in `AI/` | never vendored; say so at the top of the file |

@@ -123,5 +123,5 @@ negative array indices. dotconfig's scripts stay within 3.2 for that reason.
   `npx ng test --watch=false` pair — blocked under `workspace-write`, then
   `TOTAL: 829 SUCCESS` under the wider sandbox.
 
-See `~/HOST.md` for the always-on one-liners, and `windows/WINDOWS.md` /
+See `~/.agents/hosts/macos.md` (routed from `~/HOST.md`) for the one-liners, and `windows/WINDOWS.md` /
 `linux/LINUX.md` for the other platforms.

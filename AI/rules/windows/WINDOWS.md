@@ -189,5 +189,5 @@ tool upgrade.
   and MSYS2 bash run CRLF scripts. Go-task's built-in shell reports no `.exe` as
   executable to `[ -x ]` — test with `[ -f ]`. Verified 2026-10-14.
 
-See `~/HOST.md` for the always-on one-liners, and the `macos/MACOS.md` / `linux/LINUX.md` files for
+See `~/.agents/hosts/windows.md` (routed from `~/HOST.md`) for the one-liners, and the `macos/MACOS.md` / `linux/LINUX.md` files for
 the other platforms.

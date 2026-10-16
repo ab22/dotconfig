@@ -25,7 +25,8 @@ checkout are in `.agents/local.md` (gitignored).
 | `AI/rules/` | the rule files, read on demand — symlinked to `~/.agents/rules` |
 | `AI/skills/` | **first-party capabilities** the model invokes (not rules) — linked per skill into `~/.agents/skills` and `~/.claude/skills` |
 | `AI/third-party-skills.txt` | third-party skills by source — installed by `task skills`, never vendored |
-| `AI/host-context.md` | this machine's facts — symlinked to `~/HOST.md` |
+| `AI/host-context.md` | the host router: detect the OS, read its host file — symlinked to `~/HOST.md` |
+| `AI/hosts/` | per-OS host facts — symlinked to `~/.agents/hosts` |
 | `root/<os>/` | per-OS shell profiles and `$HOME` files, mirrored into `$HOME` |
 | `root/.gitignore` | the **global** git ignore — symlinked to `~/.gitignore` |
 | `scripts/` | `gen.sh`, `link.sh`, `detect-os.sh`, `update-nvchad.sh` |
