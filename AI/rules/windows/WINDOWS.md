@@ -1,5 +1,5 @@
 ---
-description: Windows traps for agent sessions — a confined shell does not inherit the machine's PATH so installed tools look missing, `task` resolves to task.ps1 and the execution policy blocks it, bash is not on PATH, symlinks need Developer Mode while junctions and hardlinks do not, and the sandbox denies spawn-with-piped-stdio so version checks lie. Also WSL's bash.exe hijacking a bare `bash`, line endings, PowerShell 5.1 re-encoding files, and Rust on Windows (locked executables, the MSVC linker, Defender, verbatim paths). Use on Windows before calling a tool missing, before writing a shell script, or when a command, build or symlink fails.
+description: Windows traps for agent sessions — a confined shell does not inherit the machine's PATH so installed tools look missing, `task` resolves to task.ps1 and the execution policy blocks it, bash is not on PATH, symlinks need Developer Mode while junctions and hardlinks do not, and the sandbox denies spawn-with-piped-stdio so version checks lie. Also WSL's bash.exe hijacking a bare `bash`, `cmd //c` opening an interactive prompt under `MSYS_NO_PATHCONV=1`, line endings, PowerShell 5.1 re-encoding files, Bash-tool heredocs that break on an apostrophe, `python` being a Store alias, and Rust on Windows (locked executables, the MSVC linker, Defender, verbatim paths). Use on Windows before calling a tool missing, before writing a shell script, or when a command, build or symlink fails.
 ---
 
 > **Read this on Windows before reporting a tool missing or writing a shell script, and when a command, a build or a symlink fails for no visible reason.**
@@ -84,6 +84,17 @@ setup script then detects the wrong OS or writes into the WSL home. Call Git's
 bash by absolute path (dotconfig's Taskfile does), or check `uname -s` reports
 `MINGW*`/`MSYS*` first.
 
+## A Git Bash script hangs in a terminal but "works" for the agent
+
+**Cause.** With `MSYS_NO_PATHCONV=1` (set so `/MIR`, `/J`, `/FI` survive), `cmd //c …`
+reaches cmd.exe as `//c`, which it does not recognise: it opens an **interactive
+prompt** and waits. A real terminal hangs; the agent shell has no stdin, so cmd exits
+at once and the command it was meant to run is silently skipped. Verified 2026-10-16.
+
+**Fix.** Under `MSYS_NO_PATHCONV=1` write `cmd /c`, and close stdin
+(`cmd /c … </dev/null`) so a mistake fails instead of hanging. Check the effect (the
+junction exists, the file was written), not the exit code.
+
 ## Creating a symlink fails: "Administrator privilege required"
 
 **Symptom.** `New-Item -ItemType SymbolicLink` → `UnauthorizedAccessException`;
@@ -150,6 +161,18 @@ ignores every `PYTHON*` variable.
 
 **Fix.** In the script, before the first print: `sys.stdout.reconfigure(encoding="utf-8")`.
 Write files with an explicit `encoding="utf-8"` too; the default is the codepage.
+
+## A Bash-tool heredoc fails: "unexpected EOF while looking for matching `'`"
+
+**Symptom.** A multi-line `cat >> f <<'EOF' … EOF` sent through the agent's Bash tool
+fails to parse when the text holds an apostrophe (`the client's`), quoted delimiter
+or not. Nothing is written. Verified 2026-10-16.
+
+**Fix.** Write the text with the Write tool to a scratchpad file, then
+`cat "$scratch" >> f`. Keep heredocs for text with no `'`.
+
+**`python` is not Python here.** `python`/`python3` are the Microsoft Store aliases
+(exit 49, "Python was not found"). Query JSON with `jq`, which is on `PATH`.
 
 ## Rust on Windows
 
