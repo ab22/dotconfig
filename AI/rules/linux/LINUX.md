@@ -124,5 +124,5 @@ the side-by-side table.
   than the Linux one, file watching across the boundary is unreliable, and line
   endings follow the Windows side. Keep the checkout inside the Linux filesystem.
 
-See `~/HOST.md` for the always-on one-liners, and the `windows/WINDOWS.md` / `macos/MACOS.md` files for
+See `~/.agents/hosts/linux.md` (routed from `~/HOST.md`) for the one-liners, and the `windows/WINDOWS.md` / `macos/MACOS.md` files for
 the other platforms.

@@ -20,7 +20,7 @@ Broad → specific. The more specific file wins where they disagree.
 | 1 | `~/.dsh/AGENTS.md` (this file) | always | universal invariants, the switch grammar, the router table |
 | 2 | `<repo>/AGENTS.md` | always, committed | the repo's **team** facts: workflow preset, routing table, commands |
 | 3 | `<repo>/.agents/local.md` | always, **gitignored** | this machine's overrides: rule files, personal switches |
-| 4 | `~/HOST.md` | always | facts about this workstation, per OS |
+| 4 | `~/HOST.md` → `~/.agents/hosts/<os>.md` | always | facts about this workstation: detect the OS, read its host file |
 | 5 | `~/.agents/rules/**` | **on demand** | language, task, OS and gate rules — read via the router |
 
 `.agents/local.md` may name rule files and flip switches; it may not contradict
@@ -173,8 +173,10 @@ are linked per skill from `dotconfig/AI/skills`; third-party ones come from
 
 ## This machine
 
-Facts about *this* workstation live in `~/HOST.md` (canonical:
-`AI/host-context.md`), OS-ordered and short. It names the current OS, whose router
-row above is live all session. **Read it before concluding that a tool is missing
-or that a command cannot work** — a confined shell does not inherit the host's
-`PATH`, so installed tools look absent; never report one missing on that alone.
+Facts about *this* workstation start at `~/HOST.md` (canonical:
+`AI/host-context.md`). It does not name the OS: it says how to detect it and routes
+to `~/.agents/hosts/<os>.md`. **Read that file before the first command**; the
+detected OS's router row above is then live all session. **Read the host file
+before concluding that a tool is missing or that a command cannot work** — a
+confined shell does not inherit the host's `PATH`, so installed tools look absent;
+never report one missing on that alone.

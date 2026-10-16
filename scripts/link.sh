@@ -322,6 +322,8 @@ link "$repo/AI/rules"     "$home/.agents/rules"      # rule files (~/.agents/rul
 # `~/.dsh/profiles/<p>/cordis.patch.yml`; keep that entry's candidate list in
 # step with what AI/AGENTS.md documents.
 link "$repo/AI/host-context.md" "$home/HOST.md"
+# The per-OS host facts ~/HOST.md routes to: `~/.agents/hosts/macos.md`, …
+link "$repo/AI/hosts"     "$home/.agents/hosts"      # host facts (~/.agents/hosts)
 
 # ---------------------------------------------------------------------------
 # 4b. Global git ignore — one file that applies to EVERY repo on this machine.

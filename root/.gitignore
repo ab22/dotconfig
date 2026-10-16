@@ -15,11 +15,21 @@
 AGENTS.local.md
 CLAUDE.local.md
 
+# Claude Code's local state; skills under .claude/skills/ stay shareable.
+.claude/*
+!.claude/skills/
+!.claude/skills/**
+
 # --- editors ---------------------------------------------------------------------
 .vscode/
 .idea/
+.zed/
+.obsidian
 *.swp
 *.swo
+
+# --- build noise -----------------------------------------------------------------
+*.log
 
 # --- OS noise --------------------------------------------------------------------
 .DS_Store

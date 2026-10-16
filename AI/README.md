@@ -17,7 +17,7 @@ ALWAYS-ON  (in every request)              ON DEMAND  (a file read, nothing else
   ~/.dsh/AGENTS.md      universal rules      ~/.agents/rules/gates/*.md      behaviour gates
   <repo>/AGENTS.md      team facts + router  ~/.agents/rules/rust/RUST.md    language floor
   <repo>/.agents/local.md  this machine      ~/.agents/rules/rust/API_HTTP.md, CLI.md,
-  ~/HOST.md             this machine's OS                                  TDD.md, CODE_REVIEW.md
+  ~/HOST.md             OS router → hosts/<os>.md                          TDD.md, CODE_REVIEW.md
                                              ~/.agents/rules/angular/…      language + tasks
                                              ~/.agents/rules/{windows,macos,linux}/
 ```
@@ -35,7 +35,8 @@ a language's code-review rules: `~/.agents/rules/rust/RUST.md` →
 | `rules/` | The rule files. Symlinked to `~/.agents/rules`; read via the router. |
 | `skills/` | **First-party capabilities** the model invokes (not rules) — skills you wrote or changed. Linked one skill at a time into `~/.agents/skills/<name>` and `~/.claude/skills/<name>`. |
 | `third-party-skills.txt` | **Third-party skills**, by source — installed on every machine by `task skills`, never vendored. |
-| `host-context.md` | This machine's facts, OS-ordered, always-on. Symlinked to `~/HOST.md`. |
+| `host-context.md` | Always-on OS router plus all-platform facts. Symlinked to `~/HOST.md`. |
+| `hosts/` | Per-OS host facts (`windows.md`, `macos.md`, `linux.md`) that `~/HOST.md` routes to. Symlinked to `~/.agents/hosts`. |
 
 **Both skill roots stay real directories.** The `skills` CLI, Claude Code's
 plugin and marketplace installers, and installers such as `npx impeccable

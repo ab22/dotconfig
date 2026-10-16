@@ -195,11 +195,14 @@ and each language has a `CODE_REVIEW.md` that owns that language's defects and
 points back at the gate. The gate does not know about Rust; the Rust file does not
 restate the severity labels.
 
-### 6. This machine — `AI/host-context.md`
+### 6. This machine — `AI/host-context.md` and `AI/hosts/<os>.md`
 
-Symlinked to `~/HOST.md`, always-on, **OS-ordered**. Holds only what must be known
-before opening a file: which OS this is, and the one-line form of each trap that
-has already cost a session. The depth belongs in the OS rule files. Delete an entry
+`AI/host-context.md` is symlinked to `~/HOST.md` and always-on. It is the same file
+on every machine, so it never names the current OS: it says how to detect it, holds
+the facts true on every platform, and routes to `AI/hosts/<os>.md` (linked as
+`~/.agents/hosts/`), which the agent reads before its first command. Each host file
+holds only what must be known before opening a file: the one-line form of each trap
+that has already cost a session on that OS. The depth belongs in the OS rule files. Delete an entry
 when it stops being true — a stale host fact is worse than a missing one.
 
 ### 7. Skills — `AI/skills/**`
@@ -294,7 +297,7 @@ Ask where the rule stops being true:
 | never — it holds for everyone, everywhere | `AI/AGENTS.md` (always-on) |
 | in another language | `rules/<lang>/<LANG>.md` |
 | when the task is a service rather than a CLI | `rules/<lang>/<TASK>.md` — and it points back at the general rule |
-| on another OS | `rules/<os>/<OS>.md`, or one line in `AI/host-context.md` |
+| on another OS | `rules/<os>/<OS>.md`, or one line in `AI/hosts/<os>.md` |
 | when the gate is switched off | `rules/gates/<GATE>.md` |
 | in another repo | that repo's committed `AGENTS.md` |
 | on another machine, same repo | `.agents/local.md` — and ask whether it should be upstreamed |
