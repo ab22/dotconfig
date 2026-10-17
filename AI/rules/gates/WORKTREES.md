@@ -38,14 +38,22 @@ branch.
 
 ## 2. Create it
 
-Let the ticket name the branch; do not invent one.
+Let the ticket name the branch; do not invent one. Cut it **without checking it
+out**, then check it out only in the new worktree:
 
 ```bash
 cd <project-dir>/<prefix>
 git fetch origin
-<the repo's ticket tool> branch <prefix> <id> --create
+<the repo's ticket tool> branch <prefix> <id>      # print the name only
+git branch --no-track <the branch the tool printed> origin/<base>
 git worktree add ../<prefix>-<id> <the branch the tool printed>
 ```
+
+**Never let the ticket tool create the branch from the main checkout** (a
+`--create`-style flag, or any `git checkout -b` / `git switch -c`). It moves the
+main checkout off whatever ticket it is on — the very thing a worktree exists to
+avoid. Branching from `origin/<base>` after the fetch gives the same current base a
+pull would, without touching the main checkout's branch or working tree.
 
 `git worktree add` refuses a directory that already exists, so a typo cannot
 silently clobber a checkout. `git worktree list` shows them all.
@@ -101,7 +109,9 @@ to another.
 A worktree is not an ordinary directory. **Deleting it by hand leaves a
 registered-but-missing checkout** that `git worktree list` keeps reporting.
 
-1. **Sync the base branch** in the main checkout.
+1. **Fetch the base branch** — `git fetch origin`. Do not switch the main checkout
+   to the base branch to sync it: it may be in the middle of another ticket, and
+   step 5 checks against the fetched `origin/<base>`, not against a local copy.
 2. **Close the ticket's labels**, if the repo uses that lifecycle.
 3. **Stop everything running in the worktree** — dev server, watcher, E2E run. A
    process still holding the port or the directory is the usual reason the next step
@@ -110,11 +120,15 @@ registered-but-missing checkout** that `git worktree list` keeps reporting.
    worktree is dirty, **that check is doing its job** — look at `git -C
    ../<prefix>-<id> status` and decide whether the work is worth keeping. `--force`
    discards it; use it deliberately, never because the first attempt failed.
-5. **Delete the local branch** (merged, so `-d` must succeed), then
-   `git worktree prune`. The **remote** branch usually needs no step: with GitHub's
-   *"Automatically delete head branches"* setting on, merging the PR removes it —
-   turn that setting on where it is off, because it cannot be forgotten. `-d`
-   refusing is then a useful check that the PR really landed.
+5. **Prove the branch landed, then delete it.** `git merge-base --is-ancestor
+   <branch> origin/<base>` must succeed; only then `git branch -d <branch>` and
+   `git worktree prune`. `-d` alone is **not** that check: once the branch tracks
+   its own remote (`git push -u`), git accepts it as merged into that upstream even
+   when the PR never landed — and from a main checkout on another ticket it is
+   never compared with the base at all. The **remote** branch usually needs no
+   step: with GitHub's *"Automatically delete head branches"* setting on, merging
+   the PR removes it — turn that setting on where it is off, because it cannot be
+   forgotten.
 6. **Drop the worktree's database** if you made one in step 5, together with its
    integration sibling. Leave the shared database alone — migrations another branch
    applied are still in use.
