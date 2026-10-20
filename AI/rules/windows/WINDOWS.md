@@ -1,8 +1,8 @@
 ---
-description: Windows traps for agent sessions — a confined shell does not inherit the machine's PATH so installed tools look missing, `task` resolves to task.ps1 and the execution policy blocks it, bash is not on PATH, symlinks need Developer Mode while junctions and hardlinks do not, and the sandbox denies spawn-with-piped-stdio so version checks lie. Also WSL's bash.exe hijacking a bare `bash`, line endings, PowerShell 5.1 re-encoding files, and Rust on Windows (locked executables, the MSVC linker, Defender, verbatim paths). Use on Windows before calling a tool missing, before writing a shell script, or when a command, build or symlink fails.
+description: Windows shell choice and traps for agent sessions — Bash (Git Bash) by default, PowerShell only for Windows-native work, and never a file written through a shell. Then the traps — a confined shell does not inherit the machine's PATH so installed tools look missing, `task` resolves to task.ps1 and the execution policy blocks it, bash is not on PATH, symlinks need Developer Mode while junctions and hardlinks do not, and the sandbox denies spawn-with-piped-stdio so version checks lie. Also WSL's bash.exe hijacking a bare `bash`, `cmd //c` opening an interactive prompt under `MSYS_NO_PATHCONV=1`, Git Bash rewriting container paths passed to `docker`, `gh` printing nothing without `--json` and PowerShell breaking its `--jq` quotes, pasted commands losing `*` and `X`, line endings, PowerShell 5.1 re-encoding files, Bash-tool heredocs that break on an apostrophe, perl `s|…|…|` turning `\|` into alternation and `s{…}{…}` miscounting Rust braces, deleting a folder that holds junctions, Docker Desktop not running after a reboot, `python` being a Store alias, and Rust on Windows (locked executables, the MSVC linker, Defender, verbatim paths). Use on Windows before picking a shell, before calling a tool missing, before writing a shell script, or when a command, build or symlink fails.
 ---
 
-> **Read this on Windows before reporting a tool missing or writing a shell script, and when a command, a build or a symlink fails for no visible reason.**
+> **Read this on Windows before picking a shell, reporting a tool missing or writing a shell script, and when a command, a build or a symlink fails for no visible reason.**
 
 # Windows traps
 
@@ -11,6 +11,25 @@ description: Windows traps for agent sessions — a confined shell does not inhe
 
 Each entry is symptom → cause → fix. Do not re-derive these from first principles:
 every one has already cost a session, and each cost more the second time.
+
+## Which shell
+
+Both shells are useful here, and switching between them at random is where the odd
+cases come from. Pick by the work, not by habit.
+
+- **Default: Bash (Git Bash).** This covers repo scripts, `task`, `git`, `gh`, `cargo`,
+  `jq`, and anything a Taskfile runs.
+- **PowerShell only for Windows-native work:** the registry, ACLs, Authenticode,
+  `Get-PSDrive` / `[Environment]`, and running a `.ps1`. Make it a whole PowerShell tool
+  call. Don't nest `powershell -Command "…"` inside Bash unless a script has to: the
+  nested quoting is its own trap.
+- **Never write or rewrite a file through a shell.** No heredoc, `sed -i`, `perl -pi`,
+  `Set-Content` or `Out-File`. Use the Write and Edit tools. Use a heredoc only for
+  throwaway text, such as a commit message or a comment body in the scratchpad. Each
+  shell has corrupted a file here: the heredoc trap below, a Bash-tool heredoc that
+  dropped `\\` to `\` even under `<<'EOF'` (verified 2026-10-19), and PowerShell 5.1
+  re-encoding UTF-8.
+- **Stay in one shell within one task.** Switch only for an exception above, and say why.
 
 ## A tool is reported missing and it is installed
 
@@ -47,11 +66,12 @@ which work on the host.
 
 | Tool | Location | Note |
 | --- | --- | --- |
-| `task` (go-task) | `%APPDATA%\npm\task.cmd` | npm's `@go-task/cli`. A **shim that shells out to `node`** — so it needs `node` on `PATH` too, which the sandbox also strips |
+| `task` (go-task) | `%APPDATA%\npm\task.cmd` | npm's `@go-task/cli`. A **shim that shells out to `node`** — so it needs `node` on `PATH` too, which the sandbox also strips. The real binary, `%APPDATA%\npm\node_modules\@go-task\cli\bin\task.exe`, needs no `node` and works from every shell |
 | `node` | `%LOCALAPPDATA%\Author Software\nvm\.nodejs` | nvm-managed |
 | `cargo`, `rustc` | `%USERPROFILE%\.cargo\bin` | |
 | `git`, `gh` | `C:\Program Files\Git\cmd`, `C:\Program Files\GitHub CLI` | |
 | `bash` | `C:\Program Files\Git\bin\bash.exe` | **not on `PATH`**. `Git\cmd` is, and it contains no `bash.exe` |
+| Docker Desktop | `%LOCALAPPDATA%\Programs\DockerDesktop\Docker Desktop.exe` | per-user install, not Program Files; **not started at login**. After a reboot `docker` reports `failed to connect to the docker API at npipe:…dockerDesktopLinuxEngine` until it is started. The CLI is `resources\bin\docker.exe` |
 
 ## `task` fails with "running scripts is disabled on this system"
 
@@ -59,8 +79,14 @@ which work on the host.
 which it prefers over `task.cmd` — and the execution policy is `Undefined` at every
 scope (Restricted).
 
-**Fix.** Use cmd.exe or git-bash, call `task.cmd` explicitly, or set the policy.
+**Fix.** Call `task.cmd` explicitly from PowerShell or cmd.exe, or set the policy.
 This looks like a missing tool and is not.
+
+**Not under git-bash:** there the bare name resolves to npm's `task` sh-shim, which
+builds a bad path (`C:\Program Files\Git\Users\...\run-task.js`) and fails, and
+`task.cmd` goes through cmd.exe, so the `{a,b}` brace syntax doesn't expand. Put the
+real binary first instead:
+`export PATH="$APPDATA/npm/node_modules/@go-task/cli/bin:$PATH"`.
 
 ## A repo task exits 127, or "bash: executable file not found"
 
@@ -77,6 +103,58 @@ PowerShell and runs the script **inside WSL** — Linux `uname`, Linux `$HOME`. 
 setup script then detects the wrong OS or writes into the WSL home. Call Git's
 bash by absolute path (dotconfig's Taskfile does), or check `uname -s` reports
 `MINGW*`/`MSYS*` first.
+
+## A Git Bash script hangs in a terminal but "works" for the agent
+
+**Cause.** With `MSYS_NO_PATHCONV=1` (set so `/MIR`, `/J`, `/FI` survive), `cmd //c …`
+reaches cmd.exe as `//c`, which it does not recognise: it opens an **interactive
+prompt** and waits. A real terminal hangs; the agent shell has no stdin, so cmd exits
+at once and the command it was meant to run is silently skipped. Verified 2026-10-16.
+
+**Fix.** Under `MSYS_NO_PATHCONV=1` write `cmd /c`, and close stdin
+(`cmd /c … </dev/null`) so a mistake fails instead of hanging. Check the effect (the
+junction exists, the file was written), not the exit code.
+
+## A `docker` argument from Git Bash arrives as a Windows path
+
+**Symptom.** A container path in a `docker run` / `docker compose exec` argument becomes
+`C:/Program Files/Git/entrypoint.sh`, and a script's error names `/nonexistent` as
+`C:/Program Files/Git/nonexistent`.
+
+**Cause.** MSYS rewrites every argument that looks like a POSIX path before it starts a
+native exe. Verified 2026-10-17.
+
+**Fix.** Prefix the command with `MSYS_NO_PATHCONV=1`, and turn host paths for
+`-v`/`--mount` into Windows form yourself with `cygpath -m "$dir"`. With conversion off,
+the `cmd //c` trap above applies.
+
+## `gh` prints nothing, or rejects its `--jq`
+
+**Symptom.** From the Bash tool, `gh issue view <n> --comments` exits 0 and prints
+nothing. From PowerShell 5.1, `--jq '"\(.number) \(.title)"'` fails with
+`unknown arguments` or `unexpected token "\\"`. Verified 2026-10-17.
+
+**Cause.** With no terminal, the plain view prints nothing. PowerShell 5.1 strips the
+embedded double quotes when it passes the argument to a native exe.
+
+**Fix.** Always ask for `--json <fields>`. Filter with `--jq` from Git Bash, or pipe the
+JSON to `ConvertFrom-Json` in PowerShell rather than passing a quoted jq filter.
+
+## A command the user pasted into PowerShell runs mangled
+
+**Symptom.** A command handed to the user to paste runs with characters missing: the
+regex `.* failed` arrives as `.,`, and the path `20261018\B-webview2` as `20261webview`.
+The command then fails, or prints nothing, which looks like a real result. Verified
+2026-10-18, twice in one session.
+
+**Cause.** The paste path, not PowerShell, eats `*` and `\` followed by a letter or a
+digit.
+
+**Fix.** Write commands for the user to paste with no `*` and no backslash path: use
+`-Filter`/`-Recurse` and a literal `Select-String` pattern instead of wildcards, build
+paths with `Join-Path` or forward slashes, or put the command in a `task` recipe or a
+script file. If the output is empty or an error names a path you did not write, ask for
+the command line as it ran before you read anything into the result.
 
 ## Creating a symlink fails: "Administrator privilege required"
 
@@ -105,6 +183,22 @@ file instead of writing into it: the other entry keeps the old inode and now loo
 like an ordinary file. `link.sh` records the hardlinks it made and re-links a
 drifted one on the next run; any other tool's hardlink needs the same care.
 `[ a -ef b ]` is the check that two paths are still one file.
+
+## Deleting a folder that holds junctions
+
+**Risk.** Windows PowerShell 5.1's `Remove-Item -Recurse` can follow a junction and
+delete its *target's* contents. From Git Bash, `cmd /c "rmdir \"$j\""` fails on the
+quoting ("syntax is incorrect") and deletes nothing.
+
+**Fix.** Unlink each junction first, then delete the rest, from PowerShell:
+
+```powershell
+Get-ChildItem -LiteralPath $dir -Recurse -Directory -Attributes ReparsePoint |
+  ForEach-Object { [System.IO.Directory]::Delete($_.FullName, $false) }  # removes the link only
+[System.IO.Directory]::Delete($dir, $true)   # once no reparse point is left
+```
+
+Check that the target still has its files afterwards. Verified 2026-10-16.
 
 ## A subprocess fails with EPERM for no visible reason
 
@@ -135,6 +229,42 @@ equality test fails on Windows only. The fix is a committed `.gitattributes`
 `Set-Content`.** It reads UTF-8 as cp1252 and writes it back, turning every em
 dash into three characters, and `-Encoding UTF8` adds a BOM. Use the edit tools;
 the byte-level recipe is in the `authoring-agent-files` skill.
+
+## Python crashes with `UnicodeEncodeError: 'charmap' codec`
+
+**Cause.** The console is cp1252, so `print` of any non-ASCII text (`→`, `—`, `…`)
+raises. Setting `PYTHONIOENCODING=utf-8` does nothing under `py -I`: isolated mode
+ignores every `PYTHON*` variable.
+
+**Fix.** In the script, before the first print: `sys.stdout.reconfigure(encoding="utf-8")`.
+Write files with an explicit `encoding="utf-8"` too; the default is the codepage.
+
+## A Bash-tool heredoc fails: "unexpected EOF while looking for matching `'`"
+
+**Symptom.** A multi-line `cat >> f <<'EOF' … EOF` sent through the agent's Bash tool
+fails to parse when the text holds an apostrophe (`the client's`), quoted delimiter
+or not. Nothing is written. Verified 2026-10-16.
+
+**Fix.** Write the text with the Write tool to a scratchpad file, then
+`cat "$scratch" >> f`. Keep heredocs for throwaway text with no `'` (see
+[Which shell](#which-shell)). Multi-line Rust nearly always
+holds one (lifetimes, `'static`, doc prose), so write source files with the Write tool,
+never a heredoc.
+
+**perl `s|…|…|` corrupts Markdown tables.** With `|` as the delimiter, an escaped `\|`
+in the pattern is regex alternation, not a literal pipe, so the substitution matches
+the empty string and inserts rows at the top of the file. Use `s{…}{…}`, or the Edit
+tool. Verified 2026-10-16.
+
+**perl `s{…}{…}` breaks on Rust.** A pattern or replacement holding an unbalanced or
+escaped `{`/`}` (a block, a format string, a struct literal) miscounts the delimiters, and
+`\t` in a replacement writes a literal tab into a Rust string. For Rust source use the
+Edit tool, or a perl script with `/` delimiters. Verified 2026-10-17.
+
+**`python` is not Python here.** `python`/`python3` are the Microsoft Store aliases
+(exit 49, "Python was not found"). Query JSON with `jq`, which is on `PATH`. From the
+agent's Bash tool, a bare `python3` or `py` fed a heredoc hung until the 2-minute timeout
+instead of failing. Verified 2026-10-17.
 
 ## Rust on Windows
 

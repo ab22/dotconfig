@@ -96,7 +96,7 @@ read and nothing else — no tool, no catalog, no invocation.
 | write, change or review **Rust**, `Cargo.toml` or its toolchain/CI | `~/.agents/rules/rust/RUST.md` |
 | work in **async Rust / Tokio** | `~/.agents/rules/rust/TOKIO.md` |
 | write, change or review **Angular / PrimeNG** | `~/.agents/rules/angular/ANGULAR.md` |
-| on **Windows**: call a tool missing, write a script, or debug a failed command | `~/.agents/rules/windows/WINDOWS.md` |
+| on **Windows**: pick a shell, call a tool missing, write a script, or debug a failed command | `~/.agents/rules/windows/WINDOWS.md` |
 | the same, on **macOS** | `~/.agents/rules/macos/MACOS.md` |
 | the same, on **Linux** (WSL included) | `~/.agents/rules/linux/LINUX.md` |
 

@@ -9,3 +9,4 @@
 # <source>            <skill>
 tt-a1i/archify        archify
 vercel-labs/skills    find-skills
+pbakaus/impeccable    impeccable
