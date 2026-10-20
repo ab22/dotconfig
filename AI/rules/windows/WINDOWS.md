@@ -1,8 +1,8 @@
 ---
-description: Windows traps for agent sessions — a confined shell does not inherit the machine's PATH so installed tools look missing, `task` resolves to task.ps1 and the execution policy blocks it, bash is not on PATH, symlinks need Developer Mode while junctions and hardlinks do not, and the sandbox denies spawn-with-piped-stdio so version checks lie. Also WSL's bash.exe hijacking a bare `bash`, `cmd //c` opening an interactive prompt under `MSYS_NO_PATHCONV=1`, Git Bash rewriting container paths passed to `docker`, `gh` printing nothing without `--json` and PowerShell breaking its `--jq` quotes, pasted commands losing `*` and `X`, line endings, PowerShell 5.1 re-encoding files, Bash-tool heredocs that break on an apostrophe, perl `s|…|…|` turning `\|` into alternation and `s{…}{…}` miscounting Rust braces, deleting a folder that holds junctions, Docker Desktop not running after a reboot, `python` being a Store alias, and Rust on Windows (locked executables, the MSVC linker, Defender, verbatim paths). Use on Windows before calling a tool missing, before writing a shell script, or when a command, build or symlink fails.
+description: Windows shell choice and traps for agent sessions — Bash (Git Bash) by default, PowerShell only for Windows-native work, and never a file written through a shell. Then the traps — a confined shell does not inherit the machine's PATH so installed tools look missing, `task` resolves to task.ps1 and the execution policy blocks it, bash is not on PATH, symlinks need Developer Mode while junctions and hardlinks do not, and the sandbox denies spawn-with-piped-stdio so version checks lie. Also WSL's bash.exe hijacking a bare `bash`, `cmd //c` opening an interactive prompt under `MSYS_NO_PATHCONV=1`, Git Bash rewriting container paths passed to `docker`, `gh` printing nothing without `--json` and PowerShell breaking its `--jq` quotes, pasted commands losing `*` and `X`, line endings, PowerShell 5.1 re-encoding files, Bash-tool heredocs that break on an apostrophe, perl `s|…|…|` turning `\|` into alternation and `s{…}{…}` miscounting Rust braces, deleting a folder that holds junctions, Docker Desktop not running after a reboot, `python` being a Store alias, and Rust on Windows (locked executables, the MSVC linker, Defender, verbatim paths). Use on Windows before picking a shell, before calling a tool missing, before writing a shell script, or when a command, build or symlink fails.
 ---
 
-> **Read this on Windows before reporting a tool missing or writing a shell script, and when a command, a build or a symlink fails for no visible reason.**
+> **Read this on Windows before picking a shell, reporting a tool missing or writing a shell script, and when a command, a build or a symlink fails for no visible reason.**
 
 # Windows traps
 
@@ -11,6 +11,25 @@ description: Windows traps for agent sessions — a confined shell does not inhe
 
 Each entry is symptom → cause → fix. Do not re-derive these from first principles:
 every one has already cost a session, and each cost more the second time.
+
+## Which shell
+
+Both shells are useful here, and switching between them at random is where the odd
+cases come from. Pick by the work, not by habit.
+
+- **Default: Bash (Git Bash).** This covers repo scripts, `task`, `git`, `gh`, `cargo`,
+  `jq`, and anything a Taskfile runs.
+- **PowerShell only for Windows-native work:** the registry, ACLs, Authenticode,
+  `Get-PSDrive` / `[Environment]`, and running a `.ps1`. Make it a whole PowerShell tool
+  call. Don't nest `powershell -Command "…"` inside Bash unless a script has to: the
+  nested quoting is its own trap.
+- **Never write or rewrite a file through a shell.** No heredoc, `sed -i`, `perl -pi`,
+  `Set-Content` or `Out-File`. Use the Write and Edit tools. Use a heredoc only for
+  throwaway text, such as a commit message or a comment body in the scratchpad. Each
+  shell has corrupted a file here: the heredoc trap below, a Bash-tool heredoc that
+  dropped `\\` to `\` even under `<<'EOF'` (verified 2026-10-19), and PowerShell 5.1
+  re-encoding UTF-8.
+- **Stay in one shell within one task.** Switch only for an exception above, and say why.
 
 ## A tool is reported missing and it is installed
 
@@ -227,7 +246,8 @@ fails to parse when the text holds an apostrophe (`the client's`), quoted delimi
 or not. Nothing is written. Verified 2026-10-16.
 
 **Fix.** Write the text with the Write tool to a scratchpad file, then
-`cat "$scratch" >> f`. Keep heredocs for text with no `'`. Multi-line Rust nearly always
+`cat "$scratch" >> f`. Keep heredocs for throwaway text with no `'` (see
+[Which shell](#which-shell)). Multi-line Rust nearly always
 holds one (lifetimes, `'static`, doc prose), so write source files with the Write tool,
 never a heredoc.
 

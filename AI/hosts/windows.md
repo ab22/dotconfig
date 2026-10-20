@@ -10,6 +10,9 @@
 The one-line form of each trap. The depth lives in
 `~/.agents/rules/windows/WINDOWS.md`. Delete an entry when it stops being true.
 
+- **Shell: Bash (Git Bash) by default; PowerShell only for Windows-native work** (the
+  registry, ACLs, Authenticode, `.ps1`). **Never write a file through a shell**: use the
+  Write and Edit tools. Full rule: `windows/WINDOWS.md`, "Which shell".
 - **A confined shell does not inherit this machine's `PATH`.** `Get-Command`,
   `where` and `$env:Path` inside a session are not evidence about the host, and a
   spawn-based version check returns empty for every tool — so a repo's own audit can
