@@ -1,5 +1,5 @@
 ---
-description: The ticket workflow — a plan or design document becomes a GitHub issue with the full document embedded, the ticket is the implementation source of truth, work branches from the ticket so the PR can close it, and no ticket means no PR. Includes the issue label lifecycle and the branch-naming and PR-linking rules. Use when the `tickets` or `branch-flow` switch is on and you are filing a plan, picking up a ticket, creating a feature branch, or opening a PR.
+description: The ticket workflow — a plan or design document becomes a GitHub issue with the full document embedded, the ticket is the implementation source of truth, work branches from the ticket so the PR can close it, and no ticket means no PR. Includes the issue label lifecycle, writing a ticket's Verify command, and the branch-naming and PR-linking rules. Use when the `tickets` or `branch-flow` switch is on and you are filing a plan, picking up a ticket, creating a feature branch, or opening a PR.
 ---
 
 > **Read this when the `tickets` or `branch-flow` switch is on and you are filing a ticket, branching, or opening a PR.**
@@ -113,6 +113,17 @@ description or the issue's Development sidebar.
   you are on the expected branch and in the correct repo.
 - **No issue → no PR.** Notify the user and wait for instructions rather than
   opening an orphan PR.
+
+## Writing the Verify command
+
+A ticket's Verify command is its acceptance test, so it must fail before the change
+and pass after it for the reason the ticket states. A check that is wrong forces the
+implementer to rewrite it, and the ticket then disagrees with the PR.
+
+- **Exclusion checks match whole path components.** `find -ipath '*/log*'` also
+  matches `bgm/login_window.mp3`. Write `-ipath '*/log' -o -ipath '*/log/*'`.
+- **Use paths that exist on every OS the check runs on**, e.g. `$TEMP` or a
+  repo-relative scratch folder rather than `/tmp`.
 
 ## Updating a plan that already has a ticket
 

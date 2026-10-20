@@ -30,6 +30,8 @@ cargo test --workspace --all-features --locked
 - **`cargo nextest run` does not run doc tests.** A repo that uses nextest also
   needs `cargo test --doc`, or a broken `///` example passes the gate.
 - Report the commands you ran and their result lines, not "tests pass".
+- **`cargo fmt` rewrites files on disk.** Re-read a file it may have touched before the
+  next exact-match edit to it, or the edit fails on text that is no longer there.
 
 ## Toolchain, edition, MSRV
 
