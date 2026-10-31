@@ -1,5 +1,5 @@
 ---
-description: Windows shell choice and traps for agent sessions — Bash (Git Bash) by default, PowerShell only for Windows-native work, and never a file written through a shell. Then the traps — a confined shell does not inherit the machine's PATH so installed tools look missing, `task` resolves to task.ps1 and the execution policy blocks it, bash is not on PATH, symlinks need Developer Mode while junctions and hardlinks do not, and the sandbox denies spawn-with-piped-stdio so version checks lie. Also WSL's bash.exe hijacking a bare `bash`, `cmd //c` opening an interactive prompt under `MSYS_NO_PATHCONV=1`, Git Bash rewriting container paths passed to `docker`, `gh` printing nothing without `--json` and PowerShell breaking its `--jq` quotes, pasted commands losing `*` and `X`, line endings, PowerShell 5.1 re-encoding files, Bash-tool heredocs that break on an apostrophe, perl `s|…|…|` turning `\|` into alternation and `s{…}{…}` miscounting Rust braces, deleting a folder that holds junctions, Docker Desktop not running after a reboot, `python` being a Store alias, and Rust on Windows (locked executables, the MSVC linker, Defender, verbatim paths). Use on Windows before picking a shell, before calling a tool missing, before writing a shell script, or when a command, build or symlink fails.
+description: Windows shell choice and traps for agent sessions — Bash (Git Bash) by default, PowerShell only for Windows-native work, and never a file written through a shell. Then the traps — a confined shell does not inherit the machine's PATH so installed tools look missing, `task` resolves to task.ps1 and the execution policy blocks it, bash is not on PATH, symlinks need Developer Mode while junctions and hardlinks do not, and the sandbox denies spawn-with-piped-stdio so version checks lie. Also WSL's bash.exe hijacking a bare `bash`, `cmd //c` opening an interactive prompt under `MSYS_NO_PATHCONV=1`, Git Bash rewriting container paths passed to `docker`, `localhost` costing ~2 s per connection to a container published on 127.0.0.1, `gh` printing nothing without `--json` and PowerShell breaking its `--jq` quotes, pasted commands losing `*` and `X`, line endings, PowerShell 5.1 re-encoding files, Bash-tool heredocs that break on an apostrophe, perl `s|…|…|` turning `\|` into alternation and `s{…}{…}` miscounting Rust braces, deleting a folder that holds junctions, Docker Desktop not running after a reboot, `python` being a Store alias, and Rust on Windows (locked executables, the MSVC linker, Defender, verbatim paths). Use on Windows before picking a shell, before calling a tool missing, before writing a shell script, or when a command, build or symlink fails.
 ---
 
 > **Read this on Windows before picking a shell, reporting a tool missing or writing a shell script, and when a command, a build or a symlink fails for no visible reason.**
@@ -72,6 +72,7 @@ which work on the host.
 | `git`, `gh` | `C:\Program Files\Git\cmd`, `C:\Program Files\GitHub CLI` | |
 | `bash` | `C:\Program Files\Git\bin\bash.exe` | **not on `PATH`**. `Git\cmd` is, and it contains no `bash.exe` |
 | Docker Desktop | `%LOCALAPPDATA%\Programs\DockerDesktop\Docker Desktop.exe` | per-user install, not Program Files; **not started at login**. After a reboot `docker` reports `failed to connect to the docker API at npipe:…dockerDesktopLinuxEngine` until it is started. The CLI is `resources\bin\docker.exe` |
+| `rg` (ripgrep) | **not installed** | Use the agent's Grep tool, or `git grep` / `grep -r` in Git Bash. To install: `winget install BurntSushi.ripgrep.MSVC`. Checked 2026-10-20 |
 
 ## `task` fails with "running scripts is disabled on this system"
 
@@ -127,6 +128,50 @@ native exe. Verified 2026-10-17.
 **Fix.** Prefix the command with `MSYS_NO_PATHCONV=1`, and turn host paths for
 `-v`/`--mount` into Windows form yourself with `cygpath -m "$dir"`. With conversion off,
 the `cmd //c` trap above applies.
+
+**The same trap hits MSVC tools.** `dumpbin /headers x.exe` or `mt /inputresource:…` run
+from Git Bash get their `/switch` rewritten into a path, and the tool reports a missing
+file or an unknown option. Prefix them with `MSYS_NO_PATHCONV=1` too. Verified 2026-10-20.
+
+## Every connection to a Docker container waits about 2 s
+
+**Symptom.** A suite that talks to a container (PostgreSQL from `docker compose`) is 20×
+slower than it should be: one test with ~40 short queries took 90 s, the whole suite two
+minutes instead of 5 s. Nothing fails, and nothing is contended. Verified 2026-10-19.
+
+**Cause.** The URL says `localhost`, which Windows resolves to `::1` first. The port is
+published on `127.0.0.1` only (`"127.0.0.1:5432:5432"`), so the IPv6 attempt is refused, and
+Windows retries a refused connection for about 2 s before it falls back to IPv4. A client
+that opens a connection per test or per query (a test pool, a migration tool) pays that each
+time.
+
+**Fix.** Write `127.0.0.1`, not `localhost`, in every URL for a loopback-published container:
+`.env`, `.env.example`, a tool's default. Linux and macOS do not retry, so the same URL looks
+fine there. Measure one connection before blaming the database.
+
+## Tests against a Docker container fail with connection resets
+
+**Symptom.** A test suite run natively against a PostgreSQL container fails with
+`os error 10054` ("connection was forcibly closed") and timeouts, a different test each run,
+and each database test takes 5–20 s. The URL already says `127.0.0.1`, and PostgreSQL is idle
+(its log shows `still waiting for backend … to accept ProcSignalBarrier`: a backend stuck
+writing to a client that stopped reading). A bare TCP connect to the published port takes
+1–7 s. Verified 2026-10-30.
+
+**Cause.** Docker Desktop's port forwarding from Windows into its VM stalls under the suite's
+connection churn. Restarting the container does not help; restarting Docker Desktop helps
+only until the next run, and fewer test threads made it worse.
+
+**Fix.** Restart Docker Desktop and re-run; it holds until the next long run. Running the
+tests in a Linux container on the compose network avoids the forwarder, but a per-checkout
+target volume costs 30–40 GB inside Docker's disk, which never shrinks on its own: with
+several worktrees it filled E: in a morning (2026-10-30), so do not route `task test` that way
+without one shared, size-checked volume. Measure a connect before blaming the code:
+`(New-Object Net.Sockets.TcpClient).Connect('127.0.0.1', <port>)` under a stopwatch.
+
+**If Docker Desktop itself hangs** (`docker ps` and `docker desktop restart` never return):
+stop its processes (`Docker Desktop`, `com.docker.*`), `wsl --terminate docker-desktop`, then
+start `Docker Desktop.exe` again.
 
 ## `gh` prints nothing, or rejects its `--jq`
 
@@ -217,6 +262,12 @@ NTFS is case-insensitive but case-preserving, so `Foo.ts` and `foo.ts` are one
 file — and a rename that only changes case needs `git mv` in two steps to be
 recorded.
 
+**Bash globs and `grep` are not.** In Git Bash, `ls -d sound*` misses `Sound/`, and
+`ls | grep sound` misses it too. **Before reporting a file or folder missing, search
+case-insensitively:** `find <dir> -maxdepth 1 -iname 'sound*'`, `ls | grep -i`, or
+`git ls-files | grep -i`. A case-sensitive miss once produced a wrong "assets missing"
+report. Verified 2026-10-20.
+
 **Line endings.** This machine has `core.autocrlf=true`, so a repo with no
 `.gitattributes` is checked out CRLF. Git-for-Windows bash tolerates a CRLF script;
 WSL, Linux and macOS do not (`$'\r': command not found`, `bad interpreter`). A
@@ -265,6 +316,11 @@ Edit tool, or a perl script with `/` delimiters. Verified 2026-10-17.
 (exit 49, "Python was not found"). Query JSON with `jq`, which is on `PATH`. From the
 agent's Bash tool, a bare `python3` or `py` fed a heredoc hung until the 2-minute timeout
 instead of failing. Verified 2026-10-17.
+
+A Python step that fails inside a `;` chain lets the next command run anyway: a heredoc meant to
+resolve a rebase conflict failed this way, and the `git rebase --continue` after it committed the
+conflict markers. Resolve conflicts with the Edit tool, and check that
+`git grep -n '^<<<<<<< \|^>>>>>>> '` is empty before every `rebase --continue`. Verified 2026-10-20.
 
 ## Rust on Windows
 

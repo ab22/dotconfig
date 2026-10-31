@@ -48,6 +48,9 @@ Consequences worth stating plainly:
    reviewed, committed, and said to go (or as part of an explicit one-go
    request). The PR body must carry the closing keyword; a branch name does not
    link anything.
+5. **A pushed PR that falls behind or conflicts with the base:** merge
+   `origin/<base>` into the branch, resolve, re-verify, and push. Never rebase a
+   pushed branch: that needs a force-push. Rebase only what was never pushed.
 
 ## Labels
 
@@ -131,6 +134,14 @@ Re-run the tool's `update` path rather than creating a second `docs/` file. It
 rewrites the summary and the embedded document and preserves the companion
 cross-link; title and labels are untouched. To iterate locally first, write the
 draft outside `docs/` and pass that path.
+
+## Rewriting an issue body by hand
+
+When no tool covers the change (a Verify command, a new section), edit from a file, never from a
+pipe: read the body into a file, **check it is non-empty and still has its `## ` sections**, edit
+the file, then write it with `--body-file` (or `gh api -X PATCH … -F body=@<file>`), and read it
+back. A read that fails on a flaky network leaves an empty file, and an unchecked write then
+blanks the issue. That once wiped an issue's whole body; it was restored from an earlier read.
 
 ## Prerequisites
 
