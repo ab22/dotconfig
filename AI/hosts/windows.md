@@ -37,9 +37,16 @@ The one-line form of each trap. The depth lives in
 - **C: is nearly full, and its 2 GB page file cannot grow.** The commit limit is about 33 GB
   on 31 GB of RAM. Parallel GPUI/MSVC builds die with `os error 1455` ("paging file too
   small"), and the crash can take the console with it. A full C: also truncates files that
-  git or the linker is writing (`LNK1318`, 0-byte sources after a failed `git switch`). Keep
-  cargo targets and `TMP`/`TEMP` on E:, and pass `-j 2` / `--build-jobs 2` per build
-  (verified 2026-10-18). A page file on E: would lift the limit.
+  git or the linker is writing (`LNK1318`, 0-byte sources after a failed `git switch`). Pass
+  `-j 2` / `--build-jobs 2` per build (verified 2026-10-18). A page file on E: would lift the
+  limit.
+- **All code lives on E:** (owner decision 2026-10-30). Checkouts in `E:\code\<repo>`,
+  worktrees in `E:\code\<prefix>-<n>`, cargo targets in the checkout, `TMP`/`TEMP` on E:.
+  **Never create a checkout, worktree, target or temp dir on C:.** Rustup and cargo stay on
+  C:. Full layout: `windows/WINDOWS.md`, "Where code, builds and temp files live".
+- **Keep the Npcap Loopback Adapter disabled.** With it up, its self-assigned
+  `169.254.x.x` address becomes the IP a server announces for itself, and its peers cannot
+  connect to it (verified 2026-10-30). Disabling it needs an admin shell.
 - **Never call a bare `python3` or `py` from the agent shell.** `python3` is the Store
   alias, and with a heredoc either one hung until the 2-minute timeout (verified
   2026-10-17). Use `jq` for JSON; full detail in `windows/WINDOWS.md`.

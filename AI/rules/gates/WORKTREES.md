@@ -36,6 +36,10 @@ The directory name is `{prefix}-{ticket-name}[-{short-description}]`:
 **Never** nest a worktree inside another worktree, and never name it after the
 branch.
 
+**The host can fix the drive.** If the OS rule file names where code lives (on
+Windows, `windows/WINDOWS.md`, "Where code, builds and temp files live"), the
+worktree goes there, whatever the repo's own path examples say.
+
 ## 2. Create it
 
 Let the ticket name the branch; do not invent one. Cut it **without checking it

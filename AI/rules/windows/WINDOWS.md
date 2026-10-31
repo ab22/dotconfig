@@ -1,5 +1,5 @@
 ---
-description: Windows shell choice and traps for agent sessions — Bash (Git Bash) by default, PowerShell only for Windows-native work, and never a file written through a shell. Then the traps — a confined shell does not inherit the machine's PATH so installed tools look missing, `task` resolves to task.ps1 and the execution policy blocks it, bash is not on PATH, symlinks need Developer Mode while junctions and hardlinks do not, and the sandbox denies spawn-with-piped-stdio so version checks lie. Also WSL's bash.exe hijacking a bare `bash`, `cmd //c` opening an interactive prompt under `MSYS_NO_PATHCONV=1`, Git Bash rewriting container paths passed to `docker`, `localhost` costing ~2 s per connection to a container published on 127.0.0.1, `gh` printing nothing without `--json` and PowerShell breaking its `--jq` quotes, pasted commands losing `*` and `X`, line endings, PowerShell 5.1 re-encoding files, Bash-tool heredocs that break on an apostrophe, perl `s|…|…|` turning `\|` into alternation and `s{…}{…}` miscounting Rust braces, deleting a folder that holds junctions, Docker Desktop not running after a reboot, `python` being a Store alias, and Rust on Windows (locked executables, the MSVC linker, Defender, verbatim paths). Use on Windows before picking a shell, before calling a tool missing, before writing a shell script, or when a command, build or symlink fails.
+description: Windows shell choice and traps for agent sessions — Bash (Git Bash) by default, PowerShell only for Windows-native work, and never a file written through a shell. Then the traps — a confined shell does not inherit the machine's PATH so installed tools look missing, `task` resolves to task.ps1 and the execution policy blocks it, bash is not on PATH, symlinks need Developer Mode while junctions and hardlinks do not, and the sandbox denies spawn-with-piped-stdio so version checks lie. Also WSL's bash.exe hijacking a bare `bash`, `cmd //c` opening an interactive prompt under `MSYS_NO_PATHCONV=1`, Git Bash rewriting container paths passed to `docker`, `localhost` costing ~2 s per connection to a container published on 127.0.0.1, `gh` printing nothing without `--json` and PowerShell breaking its `--jq` quotes, pasted commands losing `*` and `X`, line endings, PowerShell 5.1 re-encoding files, Bash-tool heredocs that break on an apostrophe, perl `s|…|…|` turning `\|` into alternation and `s{…}{…}` miscounting Rust braces, deleting a folder that holds junctions, Docker Desktop not running after a reboot, `python` being a Store alias, Rust on Windows (locked executables, the MSVC linker, Defender, verbatim paths), and where code, worktrees, cargo targets and TMP live (E:, never C:) and how to move a checkout. Use on Windows before picking a shell, before calling a tool missing, before writing a shell script, or when a command, build or symlink fails.
 ---
 
 > **Read this on Windows before picking a shell, reporting a tool missing or writing a shell script, and when a command, a build or a symlink fails for no visible reason.**
@@ -344,6 +344,46 @@ General Windows behaviour rather than one-off observations — check, do not ass
   `tokio::signal::unix` does not exist here — gate it with `#[cfg(unix)]`.
 - **Deep `target\` or `node_modules` paths pass 260 characters.** Enable long paths
   in Windows and `git config --global core.longpaths true` before blaming the tool.
+
+## Where code, builds and temp files live
+
+**Why.** C: is nearly full and its page file cannot grow. On 2026-10-30 C: hit 0 MB
+free, and a test run in a main checkout on C: failed with "There is not enough space on
+the disk" (rustc `IO failure on output stream`). E: is an NVMe with room. Owner decision
+2026-10-30: every code checkout, build and test run lives on E:.
+
+- **Main checkouts:** `E:\code\<repo>`. Clone or move a repo there, never under
+  `C:\Users\<you>\code`.
+- **Worktrees:** `E:\code\<prefix>-<n>`, a sibling of the main checkout on E:. This
+  replaces the "next to the main checkouts" location in `gates/WORKTREES.md` only when
+  the main checkout is somewhere else. Every other step there still applies.
+- **Cargo output:** each checkout's own `target\`, which is on E: with the checkout. Do
+  not share a `CARGO_TARGET_DIR` between checkouts: parallel builds block on its lock, and
+  cargo never deletes superseded artifacts, so a long-lived target only grows. A shared
+  one reached almost 500 GB (2026-10-30). Delete a target that passes ~50 GB, and a
+  worktree's with the worktree.
+- **`TMP`/`TEMP`:** persisted at User level as `E:\tmp`. A shell started before that
+  change, or a confined agent shell, may still show the old `AppData\Local\Temp`; check
+  `$env:TMP` and set it for the build if it points at C:. A worktree may use its own
+  `E:\code\tmp\<prefix>-<n>`, as its repo's `.agents/local.md` says.
+- **Build jobs:** `-j 2` (cargo) / `--build-jobs 2` (nextest) per checkout while several
+  build at once, until a page file exists on E:.
+- **Docker Desktop's disk** is on E: (`E:\dockerdisk`). It never shrinks on its own:
+  prune the build cache between tickets.
+- **Rustup and cargo stay on C:** (`~/.rustup`, `~/.cargo`). Do not set
+  `RUSTUP_HOME`/`CARGO_HOME`.
+- **A junction can cross drives.** Make it from the PowerShell tool
+  (`cmd /c mklink /J <link> <target>`), not Git Bash, which strips the backslashes and
+  leaves a junction that points nowhere.
+- **Moving a checkout** breaks what names its old path. After the move, from the new
+  checkout: `git worktree repair` (and `git worktree repair <path>` from each worktree);
+  re-make every junction that pointed into the old path; fix any `.env` that names it;
+  delete each CMake build dir's `CMakeCache.txt` and `CMakeFiles\` (CMake refuses a cache
+  made in another directory, 2026-10-30); and
+  copy Claude Code's project memory folder, which is keyed by the path
+  (`~/.claude/projects/C--Users-<you>-code-<repo>` → `E--code-<repo>`). Close every agent
+  session running in the checkout first: a session cannot move its own directory.
+- **Check free space** before a long run: `Get-PSDrive C,E`. Keep E: above 100 GB free.
 
 ## Verified
 
