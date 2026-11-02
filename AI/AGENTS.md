@@ -135,6 +135,14 @@ and its concrete wiring win over a shared file where they are more specific.
 - Keep changes minimal and focused on the request.
 - Run the repo's own verification before calling anything done, and report what
   you actually ran.
+- **Brief before you start a ticket.** Before any code, give the user:
+  - a summary of the work;
+  - how to reproduce it (bugs only);
+  - the suggested fix;
+  - the model and effort you recommend;
+  - an offer to hand it to a separate agent.
+
+  Then wait for the go-ahead.
 
 ## Continuous improvement
 

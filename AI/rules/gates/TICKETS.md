@@ -32,6 +32,30 @@ Consequences worth stating plainly:
   full document embedded and a companion cross-link, so each implementing agent
   has self-contained context without reaching into the other repo.
 
+## Issue body
+
+**Sections, in this order.** The person picking the ticket up reads what and how before the
+detail:
+
+1. `## Goal`: what is done when the ticket is closed, in a few lines.
+2. `## Reproduce`: bugs only. Steps from a clean state to the wrong behaviour, and what should
+   happen instead.
+3. `## Suggested fix`: the approach, the files or modules it touches, and the alternatives
+   rejected, with why.
+4. `## Scope` / `## Out of scope`.
+5. `## Tests`: the cases that prove it, each seen failing first.
+6. `## Verify`: the acceptance command (see below).
+7. `## Dependencies`.
+
+**Optional sections** go between Scope and Tests when they help, e.g. references, design notes
+or open questions. A repo's committed `AGENTS.md` may add its own.
+
+**No model or effort in the ticket.** Who runs it, and how hard, is decided at pickup, in the
+briefing the global rules ask for. It goes stale in a ticket.
+
+**Existing tickets are not rewritten for the format.** Move one to it when it is next edited for
+another reason.
+
 ## Lifecycle
 
 1. **Write the plan** as a Markdown doc, split into phases with Test-Driven Design
