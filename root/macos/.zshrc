@@ -2,6 +2,13 @@
 eval "$(/opt/homebrew/bin/brew shellenv)"
 autoload -Uz compinit && compinit
 
+# brew shellenv prepends /opt/homebrew/bin, landing it ahead of the mise shims that
+# ~/.zshenv prepended (.zshenv is sourced before this file). That shadows repo-pinned
+# toolchains with Homebrew's — e.g. `go` resolving to brew's 1.26.5 while GOROOT points
+# at mise's 1.26.3, which breaks builds with a compile/go-tool version mismatch.
+# Re-prepend so mise wins. Keep this after brew shellenv.
+export PATH="$HOME/.local/share/mise/shims:$PATH"
+
 # Set vi mode
 set -o vi
 bindkey -M vicmd '/' history-incremental-search-backward
@@ -20,6 +27,8 @@ export GOBIN=$GOPATH/bin
 export PATH=$PATH:$GOBIN
 # Rust
 export PATH=$PATH:~/.cargo/bin
+# Other
+export DOCKER_HOST="unix://$HOME/.docker/run/docker.sock"
 
 # agent-toolkit binaries (gh-plan, plan, preflight, handoff, dod)
 export PATH="$PATH:$HOME/.local/bin"
@@ -57,3 +66,5 @@ export MANWIDTH=90
 eval "$(direnv hook zsh)"
 eval "$(task --completion zsh)"
 export PATH=/opt/homebrew/opt/libpq/bin:$PATH
+
+eval "$(/Users/abe/.local/bin/mise activate zsh)"
