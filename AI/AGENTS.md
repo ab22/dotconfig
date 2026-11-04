@@ -139,29 +139,9 @@ and its concrete wiring win over a shared file where they are more specific.
   - a summary of the work;
   - how to reproduce it (bugs only);
   - the suggested fix;
-  - the model and effort you recommend;
   - an offer to hand it to a separate agent.
 
   Then wait for the go-ahead.
-
-## Continuous improvement
-
-At the end of a session, if something cost time that a rule could have caught,
-**suggest the improvement** — do not just note it:
-
-1. Name what recurred and what it cost (a command retried, a trap re-derived, a
-   correction the user had to make twice).
-2. Route it to the narrowest lever that would have caught it:
-   - true of one language → `~/.agents/rules/<lang>/`
-   - true of this OS → `~/.agents/rules/<os>/`
-   - true of one task shape → the task file inside that language's directory
-   - true of one repo → that repo's committed `AGENTS.md`
-   - true everywhere → this file
-3. Say which file you would edit and what the edit is, in one or two lines.
-4. Then stop. **Never edit a rule file mid-task** to record a lesson — the user
-   decides, and a rule that changed under them is worse than a missing one.
-
-Skip it when there was no friction. A suggestion that is always present is noise.
 
 ## Skills
 
