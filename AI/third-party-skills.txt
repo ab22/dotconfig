@@ -15,5 +15,5 @@
 tt-a1i/archify        archify
 vercel-labs/skills    find-skills
 pbakaus/impeccable    impeccable
-# Instructions only: the REA MCP server and engines are installed separately.
+# Instructions only: the REA MCP server and engines are installed separately (#4).
 morluto/rea           reverse-engineer-anything
