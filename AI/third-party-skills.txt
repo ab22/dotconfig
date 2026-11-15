@@ -6,7 +6,14 @@
 # A skill you wrote or changed belongs in AI/skills/ instead — this list is for
 # skills whose upstream owns the content.
 #
+# Not listed here, because they ship as Claude Code plugins (bundled scripts,
+# agents, hooks) that a per-skill install would break — install by hand:
+#   claude plugin marketplace add AgriciDaniel/claude-seo
+#   claude plugin install claude-seo@agricidaniel-claude-seo
+#
 # <source>            <skill>
 tt-a1i/archify        archify
 vercel-labs/skills    find-skills
 pbakaus/impeccable    impeccable
+# Instructions only: the REA MCP server and engines are installed separately.
+morluto/rea           reverse-engineer-anything
